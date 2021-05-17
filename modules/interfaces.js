@@ -45,17 +45,20 @@ export class ChatInterface {
         return new ChatInterface(new inkjs.Story(json));
     }
 
-    run() {
+    async run() {
         while (this.inkStory.canContinue) {
-            this.step(this.inkStory);
+            await this.step(this.inkStory);
         }
     }
 
-    step() {
+    async step() {
         ChatMessage.create({ content: this.inkStory.ContinueMaximally() });
-        for (var choice of this.inkStory.currentChoices) {
-            ChatMessage.create({ content: choice.text });
-        };
+        const html = await renderTemplate(
+            "modules/foundry-ink/templates/choices.html",
+            { choices: this.inkStory.currentChoices } );
+
+        await ChatMessage.create({ content: html });
+
         if (this.inkStory.currentChoices.length > 0) {
             this.inkStory.ChooseChoiceIndex(0);
         } else {
