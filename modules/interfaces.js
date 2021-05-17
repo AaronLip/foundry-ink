@@ -52,17 +52,32 @@ export class ChatInterface {
     }
 
     async step() {
-        ChatMessage.create({ content: this.inkStory.ContinueMaximally() });
+        ChatMessage.create({ content: this.inkStory.ContinueMaximally(), speaker: { alias: "Ink in the Foundry" } });
         const html = await renderTemplate(
             "modules/foundry-ink/templates/choices.html",
-            { choices: this.inkStory.currentChoices } );
+            { choices: this.inkStory.currentChoices });
 
-        await ChatMessage.create({ content: html });
+        var choices = $(document).find('#chat-log').find('.ink-choice');
+        for (let choice of choices) {
+            $(choice).off('click');
+            $(choice).prop('disabled', true)
+        }
 
-        if (this.inkStory.currentChoices.length > 0) {
-            this.inkStory.ChooseChoiceIndex(0);
+        if (!this.inkStory.currentChoices.length > 0) {
+            await ChatMessage.create({ content: "THE END", speaker: { alias: "Ink in the Foundry" } });
         } else {
-            ChatMessage.create({ content: "THE END" });
+            await ChatMessage.create({ content: html, speaker: { alias: "Ink in the Foundry" } });
+            var currentChoices = $(document).find('#chat-log').find('.ink-choice:not(:disabled)');
+            console.log(currentChoices);
+            function closure(foundryInk) {
+                return async function() {
+                    foundryInk.inkStory.ChooseChoiceIndex($(event.target).data('index'));
+                    console.log(foundryInk);
+                    await foundryInk.step();
+                };
+            };
+
+            currentChoices.on('click', closure(this));
         }
     }
 
