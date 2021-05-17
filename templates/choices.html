@@ -1,11 +1,13 @@
 <div class="foundry-ink chat-card">
     <header class="card-header flexrow">
+        <div class="ink-text">{{txt}}</div>
     </header>
 
     <div class="card-buttons">
         {{#each choices}}
         <button data-index="{{this.index}}" data-source="{{this.sourcePath}}" class="ink-choice">{{this.text}}</button>
         {{/each}}
+        <span data-sourcefile="{{sourcefile}}" style="display:none;">{{state}}</span>
     </div>
 
     <footer class="card-footer">

@@ -56,13 +56,21 @@ export class ChatInterface {
     }
 
     async step() {
-        ChatMessage.create({ content: this.inkStory.ContinueMaximally(), speaker: { alias: "Ink in the Foundry" } });
+        ChatMessage.create({
+            content: this.inkStory.ContinueMaximally(),
+            speaker: {
+                //actor: game.actors.getName("Blake"),
+                alias: "Ink in the Foundry"
+            },
+            type: CONST.CHAT_MESSAGE_TYPES.IC
+        });
         const html = await renderTemplate(
             "modules/foundry-ink/templates/choices.html",
             {
                 choices: this.inkStory.currentChoices,
                 state: this.inkStory.state.toJson(),
-                sourcefile: this.sourcefile });
+                sourcefile: this.sourcefile
+            });
 
         var choices = $(document).find('#chat-log').find('.ink-choice');
         for (let choice of choices) {
@@ -71,9 +79,23 @@ export class ChatInterface {
         }
 
         if (!this.inkStory.currentChoices.length > 0) {
-            await ChatMessage.create({ content: "THE END", speaker: { alias: "Ink in the Foundry" } });
+            await ChatMessage.create({
+                content: "THE END",
+                speaker: {
+                    //actor: game.actors.getName("Blake"),
+                    alias: "Ink in the Foundry",
+                },
+                type: CONST.CHAT_MESSAGE_TYPES.IC
+            });
         } else {
-            await ChatMessage.create({ content: html, speaker: { alias: "Ink in the Foundry" } });
+            await ChatMessage.create({
+                content: html,
+                speaker: {
+                    //actor: game.actors.getName("Blake"),
+                    alias: "Ink in the Foundry"
+                },
+                type: CONST.CHAT_MESSAGE_TYPES.IC
+            });
             var currentChoices = $(document).find('#chat-log').find('.ink-choice:not(:disabled)');
             console.log(currentChoices);
             function closure(foundryInk) {
