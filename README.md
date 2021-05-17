@@ -1,5 +1,5 @@
 # foundry-ink
-![Ink in the Foundry]("github-readme-assets/Early Preview.gif")
+![Ink in the Foundry](github-readme-assets/earlyPreview.gif)
 
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
