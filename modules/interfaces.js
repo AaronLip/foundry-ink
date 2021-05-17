@@ -7,7 +7,9 @@ export class DebugInterface {
     static async loadStory(jsonFilename) {
         var f = await fetch(jsonFilename);
         var json = await f.text();
-        return new DebugInterface(new inkjs.Story(json));
+        var ifc = new DebugInterface(new inkjs.Story(json));
+        ifc.sourcefile = jsonFilename;
+        return ifc;
     }
 
     run() {
@@ -42,7 +44,9 @@ export class ChatInterface {
     static async loadStory(jsonFilename) {
         var f = await fetch(jsonFilename);
         var json = await f.text();
-        return new ChatInterface(new inkjs.Story(json));
+        var ifc = new ChatInterface(new inkjs.Story(json));
+        ifc.sourcefile = jsonFilename;
+        return ifc;
     }
 
     async run() {
@@ -55,7 +59,10 @@ export class ChatInterface {
         ChatMessage.create({ content: this.inkStory.ContinueMaximally(), speaker: { alias: "Ink in the Foundry" } });
         const html = await renderTemplate(
             "modules/foundry-ink/templates/choices.html",
-            { choices: this.inkStory.currentChoices });
+            {
+                choices: this.inkStory.currentChoices,
+                state: this.inkStory.state.toJson(),
+                sourcefile: this.sourcefile });
 
         var choices = $(document).find('#chat-log').find('.ink-choice');
         for (let choice of choices) {
@@ -73,6 +80,7 @@ export class ChatInterface {
                 return async function() {
                     foundryInk.inkStory.ChooseChoiceIndex($(event.target).data('index'));
                     console.log(foundryInk);
+                    console.log($(event.target).data("state"));
                     await foundryInk.step();
                 };
             };
