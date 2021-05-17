@@ -37,10 +37,18 @@ export class DebugInterface {
 
 export class ChatInterface {
 
+    /* new ChatInterface()
+     * 
+     * Wraps an ink runtime instance for use with ChatMessages
+     */
     constructor(inkStory) {
         this.inkStory = inkStory;
     }
 
+    /* ChatInterface.loadStory()
+     *
+     * Takes a filepath to a JSON file compiled for an ink runtime and loads it into `inkjs`, returning an instance of this wrapper class.
+     */
     static async loadStory(jsonFilename) {
         var f = await fetch(jsonFilename);
         var json = await f.text();
@@ -67,9 +75,7 @@ export class ChatInterface {
         const html = await renderTemplate(
             "modules/foundry-ink/templates/choices.html",
             {
-                choices: this.inkStory.currentChoices,
-                state: this.inkStory.state.toJson(),
-                sourcefile: this.sourcefile
+                choices: this.inkStory.currentChoices
             });
 
         var choices = $(document).find('#chat-log').find('.ink-choice');
@@ -78,6 +84,7 @@ export class ChatInterface {
             $(choice).prop('disabled', true)
         }
 
+        // Print "THE END" when the story is over
         if (!this.inkStory.currentChoices.length > 0) {
             await ChatMessage.create({
                 content: "THE END",
@@ -87,8 +94,8 @@ export class ChatInterface {
                 },
                 type: CONST.CHAT_MESSAGE_TYPES.IC
             });
-        } else {
-            await ChatMessage.create({
+        } else {  // Otherwise, print the choices the user has
+            let choicesMessage = await ChatMessage.create({
                 content: html,
                 speaker: {
                     //actor: game.actors.getName("Blake"),
@@ -96,13 +103,15 @@ export class ChatInterface {
                 },
                 type: CONST.CHAT_MESSAGE_TYPES.IC
             });
+            // Stash the state within the chat message for resume after leaving foundry
+            await choicesMessage.setFlag('foundry-ink', 'state', this.inkStory.state.toJson());
+
+            // Set up button listeners
             var currentChoices = $(document).find('#chat-log').find('.ink-choice:not(:disabled)');
-            console.log(currentChoices);
             function closure(foundryInk) {
                 return async function() {
                     foundryInk.inkStory.ChooseChoiceIndex($(event.target).data('index'));
-                    console.log(foundryInk);
-                    console.log($(event.target).data("state"));
+                    console.log("IitF | Call Depth: ", foundryInk.inkStory.state.callstackDepth);
                     await foundryInk.step();
                 };
             };
