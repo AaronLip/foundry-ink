@@ -57,37 +57,19 @@ export class ChatInterface {
         return ifc;
     }
 
-    async run() {
-        while (this.inkStory.canContinue) {
-            await this.step(this.inkStory);
-        }
-    }
-
-    async step() {
-        ChatMessage.create({
-            content: this.inkStory.ContinueMaximally(),
-            speaker: {
-                //actor: game.actors.getName("Blake"),
-                alias: "Ink in the Foundry"
-            },
-            type: CONST.CHAT_MESSAGE_TYPES.IC
-        });
+    async render() {
+        var displaytext = this.inkStory.ContinueMaximally();
         const html = await renderTemplate(
-            "modules/foundry-ink/templates/choices.html",
-            {
-                choices: this.inkStory.currentChoices
-            });
-
-        var choices = $(document).find('#chat-log').find('.ink-choice');
-        for (let choice of choices) {
-            $(choice).off('click');
-            $(choice).prop('disabled', true)
-        }
+        "modules/foundry-ink/templates/choices.html",
+        {
+            choices: this.inkStory.currentChoices,
+            displaytext: displaytext
+        });
 
         // Print "THE END" when the story is over
         if (!this.inkStory.currentChoices.length > 0) {
             await ChatMessage.create({
-                content: "THE END",
+                content: displaytext + "\n\nTHE END",
                 speaker: {
                     //actor: game.actors.getName("Blake"),
                     alias: "Ink in the Foundry",
@@ -105,22 +87,12 @@ export class ChatInterface {
             });
             // Stash the state within the chat message for resume after leaving foundry
             await choicesMessage.setFlag('foundry-ink', 'state', this.inkStory.state.toJson());
-
-            // Set up button listeners
-            var currentChoices = $(document).find('#chat-log').find('.ink-choice:not(:disabled)');
-            function closure(foundryInk) {
-                return async function() {
-                    foundryInk.inkStory.ChooseChoiceIndex($(event.target).data('index'));
-                    console.log("IitF | Call Depth: ", foundryInk.inkStory.state.callstackDepth);
-                    await foundryInk.step();
-                };
-            };
-
-            currentChoices.on('click', closure(this));
+            await choicesMessage.setFlag('foundry-ink', 'sourcefile', this.sourcefile);
+            await choicesMessage.setFlag('foundry-ink', 'visited', false);
         }
     }
 
     toString() {
-        return `FoundryInk.ChatInterface.${this.jsonFilename}`;
+        return `FoundryInk.ChatInterface.${this.sourcefile}`;
     }
 }

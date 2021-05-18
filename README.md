@@ -1,11 +1,14 @@
 # foundry-ink
-![Ink in the Foundry](github-readme-assets/earlyPreview.gif)
+Ports a scripting language for interactive fiction into foundry!
+![Ink in the Foundry](github-readme-assets/preview.gif)
 
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
 ```javascript
-await (await FoundryInk.ChatInterface.loadStory('./modules/foundry-ink/ink-files/intercept.json')).run();
+(await FoundryInk.ChatInterface.loadStory('./modules/foundry-ink/ink-files/intercept.json')).render();
 ```
+
+![Walkthrough of Macro Usage](github-readme-assets/macroWalkthrough.gif)
 
 To compile new `.json` files, use the [inky editor](https://github.com/inkle/inky) (version 0.12.0), write a file using the [ink language](https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md), and then "export as JSON". Alternatively, you may use the backend of inky, the `inklecate` compiler.
 ## What is this?
