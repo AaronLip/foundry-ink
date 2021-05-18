@@ -1,7 +1,12 @@
 <div class="foundry-ink chat-card">
     <header class="card-header flexrow">
-        <div class="ink-text">{{displaytext}}</div>
     </header>
+
+    <div class="ink-text">
+        {{#each lines}}
+        <div class="ink-line">{{this}}<br/><br/></div>
+        {{/each}}
+    </div>
 
     <div class="card-buttons">
         {{#each choices}}

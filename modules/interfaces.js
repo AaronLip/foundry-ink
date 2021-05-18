@@ -58,18 +58,26 @@ export class ChatInterface {
     }
 
     async render() {
-        var displaytext = this.inkStory.ContinueMaximally();
+
+        var lines = [];
+        while (this.inkStory.canContinue) {
+            var line = this.inkStory.Continue();
+            if (line && line !== '\n') {
+                lines.push(line);
+            }
+        }
+
         const html = await renderTemplate(
         "modules/foundry-ink/templates/choices.html",
         {
             choices: this.inkStory.currentChoices,
-            displaytext: displaytext
+            lines: lines
         });
 
         // Print "THE END" when the story is over
         if (!this.inkStory.currentChoices.length > 0) {
             await ChatMessage.create({
-                content: displaytext + "\n\nTHE END",
+                content: lines.join(" ") + "\n\nTHE END",
                 speaker: {
                     //actor: game.actors.getName("Blake"),
                     alias: "Ink in the Foundry",
