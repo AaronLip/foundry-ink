@@ -1,6 +1,4 @@
 <div class="foundry-ink chat-card">
-    <header class="card-header flexrow">
-    </header>
 
     <div class="ink-text">
         {{#each lines}}
@@ -8,12 +6,10 @@
         {{/each}}
     </div>
 
-    <div class="card-buttons">
+    <div class="choice-buttons">
         {{#each choices}}
         <button data-index="{{this.index}}" data-source="{{this.sourcePath}}" class="ink-choice">{{this.text}}</button>
         {{/each}}
     </div>
 
-    <footer class="card-footer">
-    </footer>
 </div>
