@@ -6,7 +6,9 @@ Ports a scripting language for interactive fiction into foundry!<br/>
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
 ```javascript
-(await FoundryInk.ChatInterface.loadStory('./modules/foundry-ink/ink-files/intercept.json')).render();
+var sourcefile = "/modules/foundry-ink/ink-files/intercept.json";
+var fink = await FoundryInk.loadStory(sourcefile);
+FoundryInk.advance(fink, sourcefile);
 ```
 
 ![Walkthrough of Macro Usage](github-readme-assets/macroWalkthrough.gif)

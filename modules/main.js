@@ -1,59 +1,45 @@
-import '../modules/ink.js';
-import { DebugInterface, ChatInterface } from '../modules/interfaces.js';
+import { advance, loadStory, makeChoice } from '../modules/interfaces.js';
 
-Hooks.once("init", function() {
-    console.log("IitF | Ink in the Foundry is initializing");
+Hooks.once("init", async () => {
+    // Notify developers
+    console.log("Ink in the Foundry | Ink in the Foundry is initializing");
+
+    // Add types to foundry's namespace
     window.FoundryInk = {
-        DebugInterface,
-        ChatInterface
+        advance,
+        loadStory,
+        makeChoice
     };
+
+    await game.settings.register('foundry-ink', 'chatRender', {
+        name: 'ChatMessage Renderer',
+        hint: 'Enabling this renderer will output ink stories to the chat window.',
+        scope: 'world',
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
+    await game.settings.register('foundry-ink', 'consoleRender', {
+        name: 'Console Renderer',
+        hint: 'Enabling this renderer will output ink stories to the F12 debug console.',
+        scope: 'world',
+        config: true,
+        type: Boolean,
+        default: false
+    });
 });
 
-// Set up button listeners
-Hooks.on("renderChatMessage", function(message, html, data) {
-
-    if (message.getFlag('foundry-ink', 'visited')) {
-
-        for (var choice of $(html).find('.ink-choice')) {
-            $(choice).off('click');
-            $(choice).prop('disabled', true);
-        }
-
-    } else {
-        var currentChoices = $(html).find('.ink-choice:not(:disabled)');
-
-        currentChoices.on('click', async function() {
-            var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
-
-            message.setFlag('foundry-ink', 'visited', true);
-
-            Hooks.callAll(
-                "foundry-ink.makeChoice",
-                $(event.target).data('index'),
-                message.getFlag('foundry-ink', 'sourcefile'),
-                message.getFlag('foundry-ink', 'state'));
-        });
-
-    }
-})
-
-// This hook spins up an interpreter
-Hooks.on("foundry-ink.makeChoice", async function(choiceIndex, sourcefile, state=null) {
+// This hook can be called by external modules as an alternative to clicking chat buttons
+Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
 
     // Prepare a story instance
-    var fink = await ChatInterface.loadStory(sourcefile);
+    var fink = await FoundryInk.loadStory(sourcefile);
     if (state !== null) {
-        fink.inkStory.state.LoadJson(state);
+        fink.state.LoadJson(state);
     }
-
-    // Consume remaining story chunks until a choice
-    console.log("IitF | Call Depth:", fink.inkStory.state.callstackDepth);
-    while (fink.inkStory.canContinue) {
-        console.log("IitF | Text:", fink.inkStory.Continue());
-    }
-    console.log("IitF | Choices:", fink.inkStory.currentChoices);
 
     // Make the choice
-    fink.inkStory.ChooseChoiceIndex(choiceIndex);
-    fink.render();
-})
+    fink.ChooseChoiceIndex(choiceIndex);
+    FoundryInk.advance(fink, sourcefile);
+});
