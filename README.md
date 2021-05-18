@@ -1,5 +1,5 @@
 # foundry-ink
-Ports a scripting language for interactive fiction into foundry!
+Ports a scripting language for interactive fiction into foundry!<br/>
 
 ![Ink in the Foundry](github-readme-assets/preview.gif)
 
