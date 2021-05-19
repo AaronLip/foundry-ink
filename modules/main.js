@@ -28,6 +28,17 @@ Hooks.once("init", async () => {
         type: Boolean,
         default: false
     });
+
+    await game.settings.register('foundry-ink', 'dialogueSyntax', {
+        name: 'Dialogue Indication Syntax',
+        hint: 'If your ink script uses a common syntax to indicate speakers of dialogue, then you can use this drop down to select it.',
+        scope: 'world',
+        config: true,
+        type: String,
+        default: 'None',
+        choices: ['None', '<SPEAKER>: ...', '... #Dialogue: <SPEAKER>']
+    });
+
 });
 
 // This hook can be called by external modules as an alternative to clicking chat buttons

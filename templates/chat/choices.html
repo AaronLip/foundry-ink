@@ -1,9 +1,7 @@
 <div class="foundry-ink chat-card">
 
     <div class="ink-text">
-        {{#each lines}}
-        <div class="ink-line">{{this}}<br/><br/></div>
-        {{/each}}
+        {{#each lines}}{{this}}{{#unless @last}}<br><br>{{/unless}}{{/each}}
     </div>
 
     <div class="choice-buttons">

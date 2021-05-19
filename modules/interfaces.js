@@ -13,9 +13,12 @@ export async function loadStory(jsonFilename) {
  * Advance the story, notifying all hook listeners of new lines or text to handle
  */
 export async function advance(inkStory, sourcefile) {
-    var lines = [];
+    // Helpful bindings
+    inkStory.BindExternalFunction("ROLL", (formula) => (new Roll(formula)).roll().total);
 
     // Consume story lines until choices or the end
+    var lines = [];
+
     while (inkStory.canContinue) {
         var line = inkStory.Continue();
 
@@ -62,19 +65,38 @@ export async function makeChoice(choiceIndex) {
 // Chat Rendering Logic
 Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) => {
 
+    var message;
+    var speaker = { alias: "Ink in the Foundry" }
+
     if (game.settings.get('foundry-ink', 'chatRender')) {
 
-        const html = await renderTemplate("modules/foundry-ink/templates/choices.html", {
-            choices: choices,
-            lines: lines.filter(line => line && line !== '\n')
-        });
+        if (game.settings.get('foundry-ink', 'dialogueSyntax') == 1) {
 
-        var content = choices.length > 0 ? html : lines.filter(line => line && line !== '\n').join(" ") + "\n\nTHE END";
-        var message = await ChatMessage.create({
-            content: content,
-            speaker: { alias: "Ink in the Foundry" },
-            type: CONST.CHAT_MESSAGE_TYPES.OTHER
-        });
+            sayDialogue(lines);
+
+            var html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
+                choices: choices,
+                lines: ""
+            });
+
+            message = await ChatMessage.create({
+                content: choices.length > 0 ? html : "THE END",
+                speaker: speaker,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER
+            });
+        } else {
+
+            const html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
+                choices: choices,
+                lines: lines.filter(line => line && (line !== '\n')).concat(choices.length > 0 ? [] : ["THE END"])
+            });
+
+            message = await ChatMessage.create({
+                content: html,
+                speaker: speaker,
+                type: CONST.CHAT_MESSAGE_TYPES.OTHER
+            });
+        }
 
         // Stash the state within the chat message for resume after foundry reboots
         await message.setFlag('foundry-ink', 'state', state);
@@ -123,4 +145,39 @@ function suppressVisited() {
             $(choiceButton).prop('disabled', true);
         }
     }
+}
+
+// Group lines by speaker, in order
+function speakerOrder(lines) {
+    return lines.map(line => line.split(': ')).reduce((output, pair) => {
+        var [label, data] = pair;
+
+        if (!output.length || output[output.length - 1][0] !== label) {
+            output.push([label, [data]])
+        } else {
+            output[output.length - 1][1].push(data);
+        }
+        return output;
+    }, []);
+}
+
+// Output a message for each speaker, containing all their lines
+function sayDialogue(lines) {
+    speakerOrder(lines).map(async dialogueBySpeaker => {
+        var [speaker, dialogue] = dialogueBySpeaker;
+
+        const html = await renderTemplate("modules/foundry-ink/templates/chat/vino-dialogue.html", {
+            lines: dialogue.filter(line => line && (line !== '\n'))
+        });
+
+        var speaker = {
+            actor: game.actors.getName(speaker)
+        }
+
+        Hooks.callAll('handleCreateChatMessage', (await ChatMessage.create({
+            content: html,
+            speaker: speaker,
+            type: CONST.CHAT_MESSAGE_TYPES.IC
+        })));
+    });
 }
