@@ -3,7 +3,7 @@
     "title": "Ink in the Foundry",
     "description": "When you want to write a visual novel, but also play D&D with friends",
     "author": "Aaron Lip",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "minimumCoreVersion": "0.7.9",
     "compatibleCoreVersion": "0.8.3",
     "esmodules": [

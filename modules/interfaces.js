@@ -13,8 +13,8 @@ export async function loadStory(jsonFilename) {
  * Advance the story, notifying all hook listeners of new lines or text to handle
  */
 export async function advance(inkStory, sourcefile) {
-    // Helpful bindings
-    inkStory.BindExternalFunction("ROLL", (formula) => (new Roll(formula)).roll().total);
+    // Allow modules to bind external functions when the story is being re-instantiated
+    Hooks.callAll("foundry-ink.bindExternalFunctions", sourcefile, inkStory);
 
     // Consume story lines until choices or the end
     var lines = [];
