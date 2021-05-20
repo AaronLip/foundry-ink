@@ -1,7 +1,17 @@
-# foundry-ink
-Ports a scripting language for interactive fiction into foundry!<br/>
+# Ink in the Foundry, AKA foundry-ink
+This project ports a scripting language for interactive fiction into foundry!<br/>
 
-![Ink in the Foundry](github-readme-assets/preview.gif)
+![Ink in the Foundry](github-readme-assets/preview.gif)<br>
+
+Using the power of the ink scripting language, you can make interactive multimedia stories for FoundryVTT.
+
+Currently, the module supports these features:
+
+* Loading compiled stories written in ink
+* Interacting with the story in chat or console (toggle via module settings)
+* Accessing Foundry directly from your ink script using the functions `ROLL`, `ACTOR`, and `MACRO`
+
+There is still much work to do, which is why this is **version 0**.
 
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
@@ -24,6 +34,3 @@ Some example uses of the ink runtime include:
 * [I Would Like to Go Home](https://elenatchi.itch.io/i-would-like-to-go-home), a short interactive about being a Mars exploration unit with only 4.9% battery power left. Playable in your browser.
 * inkle's own [Heaven's Vault](https://store.steampowered.com/app/774201/Heavens_Vault/), a nonlinear game about archaeology, ruins, language, and the secret of Heaven's Vault.
 * More can be  found in the [ink-library](https://github.com/inkle/ink-library#ink-games-and-non-games)
-
-## What are the current features?
-This project contains an embedded `inkjs` interpreter and a wrapper for both the console and chat messages.
