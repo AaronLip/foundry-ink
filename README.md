@@ -26,4 +26,10 @@ Some example uses of the ink runtime include:
 * More can be  found in the [ink-library](https://github.com/inkle/ink-library#ink-games-and-non-games)
 
 ## What are the current features?
-This project contains an embedded `inkjs` interpreter and a wrapper for both the console and chat messages.
+This project contains:
+
+* An embedded `inkjs` interpreter
+* Wrappers to interact with stories in chat or in the console. (You can switch them in module settings)
+* External function bindings so that you can use a variety of foundry features in your ink script
+
+![Using the PRELOAD and SCENE external functions](sceneIntegration.gif)
