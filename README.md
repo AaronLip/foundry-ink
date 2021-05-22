@@ -42,4 +42,4 @@ This project contains:
 * Wrappers to interact with stories in chat or in the console. (You can switch them in module settings)
 * External function bindings so that you can use a variety of foundry features in your ink script
 
-![Using the PRELOAD and SCENE external functions](sceneIntegration.gif)
+![Using the PRELOAD and SCENE external functions](github-readme-assets/sceneIntegration.gif)
