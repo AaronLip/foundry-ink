@@ -1,7 +1,17 @@
-# foundry-ink
-Ports a scripting language for interactive fiction into foundry!<br/>
+# Ink in the Foundry, AKA foundry-ink
+This project ports a scripting language for interactive fiction into foundry!<br/>
 
-![Ink in the Foundry](github-readme-assets/preview.gif)
+![Ink in the Foundry](github-readme-assets/preview.gif)<br>
+
+Using the power of the ink scripting language, you can make interactive multimedia stories for FoundryVTT.
+
+Currently, the module supports these features:
+
+* Loading compiled stories written in ink
+* Interacting with the story in chat or console (toggle via module settings)
+* Accessing Foundry directly from your ink script using the functions `ROLL`, `ACTOR`, and `MACRO`
+
+There is still much work to do, which is why this is **version 0**.
 
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
