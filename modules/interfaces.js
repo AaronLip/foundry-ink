@@ -136,7 +136,6 @@ Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) =
 // Suppress listeners on visited choices
 function suppressVisited(parent) {
     var choiceButtons = $(parent).find('.ink-choice');
-    console.log(`DEBUGGING | ${choiceButtons.length} matches found`);
 
     for (var choiceButton of choiceButtons) {
         var message = game.collections.get("ChatMessage").get($(choiceButton).closest(".chat-message").data("messageId"));
