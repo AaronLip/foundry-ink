@@ -106,9 +106,9 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
 });
 
 // Set up Chat Message handlers when messages are loaded
-Hooks.on("renderChatMessage", function(message, html, data) {
+Hooks.on("renderChatMessage", (message, html, data) => {
 
-    suppressVisited();
+    suppressVisited(html);
 
     // Register listeners for unvisisted chat buttons
     if (game.settings.get('foundry-ink', 'chatRender')) {
@@ -130,12 +130,13 @@ Hooks.on("renderChatMessage", function(message, html, data) {
 });
 
 Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
-    suppressVisited();
+    suppressVisited(document);
 });
 
 // Suppress listeners on visited choices
-function suppressVisited() {
-    var choiceButtons = $(document).find('.ink-choice:not(:disabled)');
+function suppressVisited(parent) {
+    var choiceButtons = $(parent).find('.ink-choice');
+    console.log(`DEBUGGING | ${choiceButtons.length} matches found`);
 
     for (var choiceButton of choiceButtons) {
         var message = game.collections.get("ChatMessage").get($(choiceButton).closest(".chat-message").data("messageId"));
@@ -149,29 +150,44 @@ function suppressVisited() {
 
 // Group lines by speaker, in order
 function speakerOrder(lines) {
-    return lines.map(line => line.split(': ')).reduce((output, pair) => {
-        var [label, data] = pair;
+    var regex = /^(?<speaker>.+):\s+(?<line>.+)$/;
 
-        if (!output.length || output[output.length - 1][0] !== label) {
-            output.push([label, [data]])
+
+    var speakerScripts = (lines
+
+    // Convert the text into { speaker?: speaker, line: line } format
+    .map(line => {
+        var parse = line.trim().match(regex)?.groups;
+        if (parse === undefined) {
+            return { line: line };
         } else {
-            output[output.length - 1][1].push(data);
+            return parse;
+        }
+    })
+
+    // Aggregrate lines from each speaker, in order
+    .reduce((output, parse) => {
+        if (!output.length || output[output.length - 1][0] !== parse.speaker) {
+            output.push({ speaker: parse.speaker, lines: [parse.line] })
+        } else {
+            output[output.length - 1].lines.push(parse.line);
         }
         return output;
-    }, []);
+    }, []));
+
+    return speakerScripts;
 }
 
 // Output a message for each speaker, containing all their lines
 function sayDialogue(lines) {
-    speakerOrder(lines).map(async dialogueBySpeaker => {
-        var [speaker, dialogue] = dialogueBySpeaker;
+    speakerOrder(lines).map(async speakerScript => {
 
         const html = await renderTemplate("modules/foundry-ink/templates/chat/vino-dialogue.html", {
-            lines: dialogue.filter(line => line && (line !== '\n'))
+            lines: speakerScript.lines.filter(line => line && (line !== '\n'))
         });
 
         var speaker = {
-            actor: game.actors.getName(speaker)
+            actor: game.actors.getName(speakerScript.speaker)
         }
 
         Hooks.callAll('handleCreateChatMessage', (await ChatMessage.create({
