@@ -18,7 +18,7 @@ export function bindFunctions(inkStory) {
         var scene = getEntityFromDirectory(SceneDirectory, name);
 
         scene.view();
-        scene.activate();
+        (async () => await scene.activate())();
         return scene !== undefined;
     });
 
@@ -39,7 +39,7 @@ export function bindFunctions(inkStory) {
 function getEntityFromDirectory(directoryObject, name) {
     var entity = directoryObject.collection.getName(name);
     if (entity === undefined) {
-        console.error(`Ink in the Foundry (${typeof(directoryObject).toUpperCase()} Access Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
+        console.error(`Ink in the Foundry (${directoryObject.name} Access Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
     }
     return entity;
 }
@@ -47,14 +47,14 @@ function getEntityFromDirectory(directoryObject, name) {
 function queryEntityDataFromDirectory(directoryObject, name, propertyString) {
     var entity = directoryObject.collection.getName(name);
     if (entity === undefined) {
-        console.error(`Ink in the Foundry (${typeof(directoryObject).toUpperCase()} Query Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
+        console.error(`Ink in the Foundry (${directoryObject.name} Query Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
         return entity;
     }
 
     var data = entityDataAsInkType(entity, propertyString);
 
     if (data === null) {
-        console.error(`Ink in the Foundry (${typeof(directoryObject).toUpperCase()} Query Binding) |`, `entity.data.${propertyString} returned a value inkjs cannot handle: ${property}`);
+        console.error(`Ink in the Foundry (${directoryObject.name} Query Binding) |`, `entity.data.${propertyString} returned a value inkjs cannot handle: ${property}`);
     }
 
     return data;

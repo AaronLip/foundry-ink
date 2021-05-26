@@ -70,7 +70,7 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
 
     if (game.settings.get('foundry-ink', 'chatRender')) {
 
-        if (game.settings.get('foundry-ink', 'dialogueSyntax') == 1) {
+        if (game.settings.get('foundry-ink', 'dialogueSyntax') === 1) {
 
             sayDialogue(lines);
 
@@ -85,9 +85,8 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER
             });
         } else {
-
             const html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
-                choices: choices,
+                choices: choiceParse(choices, sourcefile, state),
                 lines: lines.filter(line => line && (line !== '\n')).concat(choices.length > 0 ? [] : ["THE END"])
             });
 
@@ -194,5 +193,40 @@ function sayDialogue(lines) {
             speaker: speaker,
             type: CONST.CHAT_MESSAGE_TYPES.IC
         })));
+    });
+}
+
+// parses out scripting syntax from choices
+function choiceParse(choices, sourcefile, state) {
+    var interfaceRegex = /^(?<interface>.+?)\s*>>\s*(?<config>.+)$/
+    var hookRegex = /^(?<hookname>.+?)\s*--\s*(?<choicetext>.+)$/
+
+    return Object.entries(choices).map(choice => {
+        var index = choice[0];
+        var text = choice[1].text;
+
+        var parse = text.trim().match(interfaceRegex)?.groups;
+
+        var choiceContainer = { text: text, index: index };
+        if (parse !== undefined) {
+            if (parse.interface === "Hooks") {
+                choiceContainer.interface = parse.interface;
+                var dataParse = parse.config.match(hookRegex)?.groups;
+
+                if (dataParse === undefined) {
+                    console.warn(`Ink in the Foundry (Hook parsing) | "${parse.config}" is the name of a hook and the text of a choice. Use "Hooks >> hookname -- choicetext" to avoid unexpected collisions with other choices and hooks`)
+                    choiceContainer.text = parse.config;
+                    Hooks.once(parse.config, () => {
+                        Hooks.callAll("foundry-ink.makeChoice", index, sourcefile, state);
+                    });
+                } else {
+                    choiceContainer.text = dataParse.choicetext;
+                    Hooks.once(dataParse.hookname, () => {
+                        Hooks.callAll("foundry-ink.makeChoice", index, sourcefile, state);
+                    });
+                }
+            }
+        }
+        return choiceContainer;
     });
 }
