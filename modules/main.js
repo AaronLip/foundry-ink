@@ -4,7 +4,7 @@ import { advance, loadStory, makeChoice } from './interfaces.js';
 
 Hooks.once("init", async () => {
     // Notify developers
-    console.log("Ink in the Foundry | Ink in the Foundry is initializing");
+    console.log(game.i18n.localize('foundry-ink.init'));
 
     // Add types to foundry's namespace
     window.FoundryInk = {
@@ -32,7 +32,12 @@ Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) =
 
 Hooks.on("foundry-ink.bindExternalFunctions", (sourcefile, inkStory) => {
     // Error handling
-    inkStory.onError = (error) => { console.error("Ink in the Foundry (inkjs error) |", error); };
+    inkStory.onError = (error) => {
+        console.error(game.i18n.format("foundry-ink.issue", {
+            cause: 'inkjs error',
+            message: error
+        }))
+    }
 
     if (game.settings.get("foundry-ink", "useDefaultBindings")) {
         bindFunctions(inkStory);

@@ -39,7 +39,13 @@ export function bindFunctions(inkStory) {
 function getEntityFromDirectory(directoryObject, name) {
     var entity = directoryObject.collection.getName(name);
     if (entity === undefined) {
-        console.error(`Ink in the Foundry (${directoryObject.name} Access Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
+        console.error(errorL10n('binding', {
+            binding: directoryObject.name,
+            cause: "Access Binding",
+            message: errorL10n('not-found', {
+                name: name
+            })
+        }));
     }
     return entity;
 }
@@ -47,14 +53,27 @@ function getEntityFromDirectory(directoryObject, name) {
 function queryEntityDataFromDirectory(directoryObject, name, propertyString) {
     var entity = directoryObject.collection.getName(name);
     if (entity === undefined) {
-        console.error(`Ink in the Foundry (${directoryObject.name} Query Binding) |`, `The entity "${name}" was not found. Make sure this name was not a typo!`);
+        console.error(errorL10n('binding', {
+            binding: directoryObject.name,
+            cause: "Query Binding",
+            message: errorL10n('not-found', {
+                name: name
+            })
+        }));
         return entity;
     }
 
     var data = entityDataAsInkType(entity, propertyString);
 
     if (data === null) {
-        console.error(`Ink in the Foundry (${directoryObject.name} Query Binding) |`, `entity.data.${propertyString} returned a value inkjs cannot handle: ${property}`);
+        console.error(errorL10n('binding', {
+            binding: directoryObject.name,
+            cause: "Query Binding",
+            message: errorL10n('not-inkjs-type', {
+                key: `entity.data.${propertyString}`,
+                value: property
+            })
+        }));
     }
 
     return data;
@@ -68,4 +87,8 @@ function entityDataAsInkType(entity, propertyString) {
     } else {
         return property;
     }
+}
+
+function errorL10n(relativePath, formatObj) {
+    return game.i18n.format(`foundry-ink.errors.${relativePath}`, formatObj);
 }

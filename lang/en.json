@@ -1,0 +1,37 @@
+{
+    "foundry-ink": {
+        "settings": {
+            "bindings-library": {
+                "name": "Bind Foundry External Functions",
+                "hint": "Enabling this lets you use some premade helper functions in your ink script. Declare them using the EXTERNAL keyword."
+            },
+            "chat-render": {
+                "name": "ChatMessage Renderer",
+                "hint": "Enabling this renderer will output ink stories to the chat window."
+            },
+            "console-render": {
+                "name": "Console Renderer",
+                "hint": "Enabling this renderer will output ink stories to the F12 debug console."
+            },
+            "dialogue-syntax": {
+                "name": "Dialogue Indication Syntax",
+                "hint": "If your ink script uses a common syntax to indicate speakers of dialogue, then you can use this drop down to select it.",
+                "none": "None",
+                "inline": "<SPEAKER>: ...",
+                "tag": "... #Dialogue: <SPEAKER>"
+            }
+        },
+        "init": "Ink in the Foundry | Ink in the Foundry is initializing.",
+        "issue": "Ink in the Foundry ({cause}) | {message}",
+        "errors": {
+            "binding": "Ink in the Foundry ({binding} {cause}) | {message}",
+            "not-found": "The entity \"{name}\" was not found. Make sure this name was not a typo!",
+            "not-inkjs-type": "{key} returned a value inkjs cannot handle: {value}"
+        },
+        "warnings": {
+            "generic": "Ink in the Foundry ({cause}) | {message}",
+            "no-choicetext": "\"{name}\" is the name of a hook and the text of a choice. Use \"Hooks >> hookname -- choicetext\" to avoid unexpected collisions with other choices and hooks",
+            "tunnel-saves": "Ink in the Foundry | The ink interpreter is inside a tunnel. Bugs will occur if you save the state here."
+        }
+    }
+}

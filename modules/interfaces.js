@@ -1,4 +1,5 @@
 import '../modules/ink.js';
+import * as serde from '../modules/serialization.js';
 
 /*
  * Loads a compiled json file for the ink runtime, then returns an inkjs interpreter for that file
@@ -14,7 +15,7 @@ export async function loadStory(jsonFilename) {
  */
 export async function advance(inkStory, sourcefile) {
     // Allow modules to bind external functions when the story is being re-instantiated
-    Hooks.callAll("foundry-ink.bindExternalFunctions", sourcefile, inkStory);
+    await Hooks.callAll("foundry-ink.bindExternalFunctions", sourcefile, inkStory);
 
     // Consume story lines until choices or the end
     var lines = [];
@@ -31,7 +32,7 @@ export async function advance(inkStory, sourcefile) {
     }
 
     if (inkStory.state.callstackDepth > 1) {
-        console.warn('Ink in the Foundry |', 'The ink interpreter is inside a tunnel. Bugs will occur if you save the state here.')
+        console.warn(game.i18n.localize('foundry-ink.warnings.tunnel-saves'));
     }
     Hooks.callAll("foundry-ink.maxContinue",
         lines,
@@ -44,7 +45,7 @@ export async function advance(inkStory, sourcefile) {
 // Console Rendering Logic
 Hooks.on("foundry-ink.continue", (line, sourcefile) => {
     if (game.settings.get('foundry-ink', 'consoleRender')) {
-        console.log(sourcefile, "|", line);
+        console.log(sourcefile, "|", line);  // TODO: Localize this
     }
 })
 
@@ -54,7 +55,7 @@ Hooks.on("foundry-ink.maxContinue", (lines, choices, sourcefile, state) => {
         state: state
     }
     if (game.settings.get('foundry-ink', 'consoleRender')) {
-        console.log(sourcefile, "|", "choices\n" + Object.entries(choices).map(entry => `${entry[0]}: ${entry[1].text}`).join('\n'));
+        console.log(sourcefile, "|", "choices\n" + Object.entries(choices).map(entry => `${entry[0]}: ${entry[1].text}`).join('\n')); // TODO: Localize this
     }
 })
 
@@ -98,9 +99,11 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
         }
 
         // Stash the state within the chat message for resume after foundry reboots
-        await message.setFlag('foundry-ink', 'state', state);
-        await message.setFlag('foundry-ink', 'sourcefile', sourcefile);
-        await message.setFlag('foundry-ink', 'visited', false);
+        serde.saveSessionToFlag(message, {
+            state: state,
+            sourcefile: sourcefile,
+            visited: false
+        });
     }
 });
 
@@ -109,7 +112,7 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
     suppressVisited(html);
 
-    // Register listeners for unvisisted chat buttons
+    // Register listeners for unvisited chat buttons
     if (game.settings.get('foundry-ink', 'chatRender')) {
 
         var currentChoices = $(html).find('.ink-choice:not(:disabled)');
@@ -117,15 +120,19 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         currentChoices.on('click', async function() {
             var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
 
-            message.setFlag('foundry-ink', 'visited', true);
+            message.setFlag('foundry-ink', 'session.visited', true);
+
+            var session = serde.loadSessionFromFlag(message);
 
             Hooks.callAll(
                 "foundry-ink.makeChoice",
                 $(event.target).data('index'),
-                message.getFlag('foundry-ink', 'sourcefile'),
-                message.getFlag('foundry-ink', 'state'));
+                session.sourcefile,
+                session.state)
         });
     }
+
+    //
 });
 
 Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
@@ -138,7 +145,7 @@ function suppressVisited(parent) {
 
     for (var choiceButton of choiceButtons) {
         var message = game.collections.get("ChatMessage").get($(choiceButton).closest(".chat-message").data("messageId"));
-        if (message.getFlag('foundry-ink', 'visited')) {
+        if (serde.loadSessionFromFlag(message)?.visited) {
 
             $(choiceButton).off('click');
             $(choiceButton).prop('disabled', true);
@@ -207,26 +214,62 @@ function choiceParse(choices, sourcefile, state) {
 
         var parse = text.trim().match(interfaceRegex)?.groups;
 
-        var choiceContainer = { text: text, index: index };
+        var choiceContainer = {
+            text: text,
+            index: index,
+            hooks: []
+        };
+
         if (parse !== undefined) {
             if (parse.interface === "Hooks") {
                 choiceContainer.interface = parse.interface;
                 var dataParse = parse.config.match(hookRegex)?.groups;
 
                 if (dataParse === undefined) {
-                    console.warn(`Ink in the Foundry (Hook parsing) | "${parse.config}" is the name of a hook and the text of a choice. Use "Hooks >> hookname -- choicetext" to avoid unexpected collisions with other choices and hooks`)
+                    console.warn(game.i18n.format('foundry-ink.warnings.generic', {
+                        cause: 'Hook parsing',
+                        message: game.i18n.format('foundry-ink.warnings.no-choicetext', {
+                            name: parse.config
+                        })
+                    }));
+
                     choiceContainer.text = parse.config;
-                    Hooks.once(parse.config, () => {
-                        Hooks.callAll("foundry-ink.makeChoice", index, sourcefile, state);
-                    });
+                    basicChoiceHook(parse.config, index, sourcefile, state);
                 } else {
                     choiceContainer.text = dataParse.choicetext;
-                    Hooks.once(dataParse.hookname, () => {
-                        Hooks.callAll("foundry-ink.makeChoice", index, sourcefile, state);
-                    });
+                    basicChoiceHook(dataParse.hookname, index, sourcefile, state);
                 }
             }
         }
         return choiceContainer;
     });
+}
+
+function basicChoiceHook(triggerHook, choiceIndex, sourcefile, state) {
+    var choiceHook = {
+        triggerHook: triggerHook,
+        index: choiceIndex,
+        sourcefile: sourcefile,
+        state: state
+    }
+    Hooks.once(triggerHook, () => {
+        Hooks.callAll("foundry-ink.makeChoice", choiceIndex, sourcefile, state);
+    });
+    return choiceHook;
+}
+
+function listenerChoiceHook(triggerHook, conditionFn, choiceIndex, sourcefile, state) {
+    var choiceHook = {
+        triggerHook: triggerHook,
+        index: choiceIndex,
+        sourcefile: sourcefile,
+        state: state
+    }
+    var handle = Hooks.on(triggerHook, (...args) => {
+        if (conditionFn(...args)) {
+            Hooks.off(triggerHook, handle);
+            Hooks.callAll("foundry-ink.makeChoice", choiceIndex, sourcefile, state);
+        }
+    });
+    return choiceHook;
 }
