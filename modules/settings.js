@@ -1,6 +1,17 @@
+/**
+ * Registers settings used by Ink in the Foundry, which can be accessed in the Module Settings tab of Foundry's Configure Settings Window.
+ * 
+ * @module settings
+ */
 export function registerSettings() {
 
     (async () => {
+        /**
+         * @member useDefaultBindings
+         * @property {String} name - Bind Foundry External Functions
+         * @property {String} hint - Enabling this lets you use some premade helper functions in your ink script. Declare them using the EXTERNAL keyword.
+         * @proprty {Boolean} default - true
+         */
         await game.settings.register('foundry-ink', 'useDefaultBindings', {
             name: settingL10n('bindings-library.name'),
             hint: settingL10n('bindings-library.hint'),
@@ -10,6 +21,12 @@ export function registerSettings() {
             default: true
         });
 
+        /**
+         * @member chatRender
+         * @property {String} name - ChatMessage Renderer
+         * @property {String} hint - Enabling this renderer will output ink stories to the chat window.
+         * @property {Boolean} default - true
+         */
         await game.settings.register('foundry-ink', 'chatRender', {
             name: settingL10n('chat-render.name'),
             hint: settingL10n('chat-render.hint'),
@@ -19,6 +36,12 @@ export function registerSettings() {
             default: true
         });
 
+        /**
+         * @member consoleRender
+         * @property {String} name - Console Renderer
+         * @property {String} hint - Enabling this renderer will output ink stories to the F12 debug console.
+         * @property {Boolean} default - false
+         */
         await game.settings.register('foundry-ink', 'consoleRender', {
             name: settingL10n('console-render.name'),
             hint: settingL10n('console-render.hint'),
@@ -28,6 +51,18 @@ export function registerSettings() {
             default: false
         });
 
+        /**
+         * @member dialogueSyntax
+         * @property {String} name - Dialogue Indication Syntax
+         * @property {String} hint - If your ink script uses a common syntax to indicate speakers of dialogue, then you can use this drop down to select it.
+         * @property {String} default - None
+         * 
+         * @property {Array} choices - A dropdown selector
+         * @property {String} choices.None - None
+         * @property {String} choices.inline - Inline (`<SPEAKER>: ...`)
+         * @property {String} choices.tag - Tag (`... #Dialogue: <SPEAKER>`)
+         * 
+         */
         await game.settings.register('foundry-ink', 'dialogueSyntax', {
             name: settingL10n('dialogue-syntax.name'),
             hint: settingL10n('dialogue-syntax.hint'),
@@ -41,5 +76,5 @@ export function registerSettings() {
 }
 
 function settingL10n(relativePath) {
-    return game.i18n.localize(`foundry-ink.settings.${relativePath}`);
+    return FoundryInk.i18n(`settings.${relativePath}`);
 }

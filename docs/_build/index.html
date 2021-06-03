@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Home - Ink in the Foundry</title>
+    
+    <meta name="description" content="When you want to write a visual novel, but also play D&D with friends" />
+    
+        <meta name="keywords" content="ink inkle foundryvtt interactive fiction cyoa story chat" />
+        <meta name="keyword" content="ink inkle foundryvtt interactive fiction cyoa story chat" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://www.github.com/AaronLip/foundry-ink" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Classes</h3><ul><li><a href="module-serde.HookData.html">serde.HookData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.HookData.html#fromFlag">fromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.HookData.html#toFlag">toFlag</a></li></ul></li><li><a href="module-serde.SessionData.html">serde.SessionData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.SessionData.html#.fromFlag">fromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.SessionData.html#toFlag">toFlag</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-bindings.html">bindings</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-bindings.html#~ACTOR">ACTOR</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~ITEM">ITEM</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~JOURNAL">JOURNAL</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~MACRO">MACRO</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~PRELOAD">PRELOAD</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~ROLL">ROLL</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~SCENE">SCENE</a></li></ul></li><li><a href="module-serde.html">serde</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.html#.loadExternalBindingFromFlag">loadExternalBindingFromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.html#.saveExternalBindingToFlag">saveExternalBindingToFlag</a></li></ul></li><li><a href="module-settings.html">settings</a></li></ul>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+    <section class="package">
+        <h3> </h3>		
+    </section>
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    <section class="readme usertext">
+        <article><h1>Ink in the Foundry, AKA foundry-ink</h1>
+<p>This project ports a scripting language for interactive fiction into foundry!<br/></p>
+<p><img src="github-readme-assets/preview.gif" alt="Ink in the Foundry"><br></p>
+<p>Using the power of the ink scripting language, you can make interactive multimedia stories for FoundryVTT.</p>
+<p>Currently, the module supports these features:</p>
+<ul>
+<li>Loading compiled stories written in ink</li>
+<li>Interacting with the story in chat or console (toggle via module settings)</li>
+<li>Accessing Foundry directly from your ink script using the functions <code>ROLL</code>, <code>ACTOR</code>, and <code>MACRO</code></li>
+</ul>
+<p>There is still much work to do, which is why this is <strong>version 0</strong>.</p>
+<h2>How can I test this?</h2>
+<p>A <code>.json</code> for &quot;The Intercept&quot; is provided at <code>/modules/ink-files/intercept.json</code> for testing purposes. You can run it using this macro:</p>
+<pre class="prettyprint source lang-javascript"><code>var sourcefile = &quot;/modules/foundry-ink/ink-files/intercept.json&quot;;
+var fink = await FoundryInk.loadStory(sourcefile);
+FoundryInk.advance(fink, sourcefile);
+</code></pre>
+<p><img src="github-readme-assets/macroWalkthrough.gif" alt="Walkthrough of Macro Usage"></p>
+<p>To compile new <code>.json</code> files, use the <a href="https://github.com/inkle/inky">inky editor</a> (version 0.12.0), write a file using the <a href="https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md">ink language</a>, and then &quot;export as JSON&quot;. Alternatively, you may use the backend of inky, the <code>inklecate</code> compiler.</p>
+<h2>What is this?</h2>
+<p>This is a proof of concept wrapper library for <a href="https://github.com/y-lohse/inkjs"><code>inkjs</code></a>, the javascript runtime for inkle's ink language.</p>
+<p><a href="https://github.com/inkle/ink">Ink</a> is the MIT-licensed scripting language used to create interactive stories of many different sizes. Because the runtime is light-weight, it has been ported to <a href="https://github.com/inkle/ink-unity-integration">Unity</a>, <a href="https://github.com/DavidColson/UnrealInk">Unreal</a>, <a href="https://github.com/y-lohse/inkjs">npm</a>, and <a href="https://github.com/paulloz/godot-ink">Godot</a>.</p>
+<p>Some example uses of the ink runtime include:</p>
+<ul>
+<li><a href="https://elenatchi.itch.io/i-would-like-to-go-home">I Would Like to Go Home</a>, a short interactive about being a Mars exploration unit with only 4.9% battery power left. Playable in your browser.</li>
+<li>inkle's own <a href="https://store.steampowered.com/app/774201/Heavens_Vault/">Heaven's Vault</a>, a nonlinear game about archaeology, ruins, language, and the secret of Heaven's Vault.</li>
+<li>More can be  found in the <a href="https://github.com/inkle/ink-library#ink-games-and-non-games">ink-library</a></li>
+</ul>
+<h2>What are the current features?</h2>
+<p>This project contains:</p>
+<ul>
+<li>An embedded <code>inkjs</code> interpreter</li>
+<li>Wrappers to interact with stories in chat or in the console. (You can switch them in module settings)</li>
+<li>External function bindings so that you can use a variety of foundry features in your ink script</li>
+</ul>
+<p><img src="github-readme-assets/sceneIntegration.gif" alt="Using the PRELOAD and SCENE external functions"></p></article>
+    </section>
+
+
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

@@ -45,7 +45,10 @@ export async function advance(inkStory, sourcefile) {
 // Console Rendering Logic
 Hooks.on("foundry-ink.continue", (line, sourcefile) => {
     if (game.settings.get('foundry-ink', 'consoleRender')) {
-        console.log(sourcefile, "|", line);  // TODO: Localize this
+        console.log(FoundryInk.i18n('templates.general', {
+            header: sourcefile, 
+            body: line
+        }));
     }
 })
 
@@ -55,7 +58,12 @@ Hooks.on("foundry-ink.maxContinue", (lines, choices, sourcefile, state) => {
         state: state
     }
     if (game.settings.get('foundry-ink', 'consoleRender')) {
-        console.log(sourcefile, "|", "choices\n" + Object.entries(choices).map(entry => `${entry[0]}: ${entry[1].text}`).join('\n')); // TODO: Localize this
+        console.log(FoundryInk.i18n('templates.general', {
+            header: sourcefile,
+            body: FoundryInk.i18n('templates.choice-prompt', {
+                choices: Object.entries(choices).map(entry => `${entry[0]}: ${entry[1].text}`).join('\n')
+            })
+        }));
     }
 })
 
@@ -99,11 +107,11 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
         }
 
         // Stash the state within the chat message for resume after foundry reboots
-        serde.saveSessionToFlag(message, {
+        new serde.SessionData({
             state: state,
             sourcefile: sourcefile,
             visited: false
-        });
+        }).toFlag(message);
     }
 });
 
@@ -120,9 +128,9 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         currentChoices.on('click', async function() {
             var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
 
-            message.setFlag('foundry-ink', 'session.visited', true);
-
-            var session = serde.loadSessionFromFlag(message);
+            var session = serde.SessionData.fromFlag(message);
+            session.visited = true;
+            session.toFlag(message);
 
             Hooks.callAll(
                 "foundry-ink.makeChoice",
@@ -132,7 +140,7 @@ Hooks.on("renderChatMessage", (message, html, data) => {
         });
     }
 
-    //
+    // TODO: Reregister hooks here, switch to journal entries
 });
 
 Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
@@ -145,7 +153,7 @@ function suppressVisited(parent) {
 
     for (var choiceButton of choiceButtons) {
         var message = game.collections.get("ChatMessage").get($(choiceButton).closest(".chat-message").data("messageId"));
-        if (serde.loadSessionFromFlag(message)?.visited) {
+        if (serde.SessionData.fromFlag(message)?.visited) {
 
             $(choiceButton).off('click');
             $(choiceButton).prop('disabled', true);
