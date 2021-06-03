@@ -1,7 +1,7 @@
 # Ink in the Foundry, AKA foundry-ink
 This project ports a scripting language for interactive fiction into foundry!<br/>
 
-![Ink in the Foundry](github-readme-assets/preview.gif)<br>
+<img src="readme-assets/preview.gif" alt="Ink in the Foundry" align="center" height="512"><br>
 
 Using the power of the ink scripting language, you can make interactive multimedia stories for FoundryVTT.
 
@@ -22,7 +22,7 @@ var fink = await FoundryInk.loadStory(sourcefile);
 FoundryInk.advance(fink, sourcefile);
 ```
 
-![Walkthrough of Macro Usage](github-readme-assets/macroWalkthrough.gif)
+<img src="readme-assets/macroWalkthrough.gif" alt="Walkthrough of Macro Usage" align="center" height="512">
 
 To compile new `.json` files, use the [inky editor](https://github.com/inkle/inky) (version 0.12.0), write a file using the [ink language](https://github.com/inkle/ink/blob/master/Documentation/WritingWithInk.md), and then "export as JSON". Alternatively, you may use the backend of inky, the `inklecate` compiler.
 ## What is this?
@@ -43,4 +43,4 @@ This project contains:
 * Wrappers to interact with stories in chat or in the console. (You can switch them in module settings)
 * External function bindings so that you can use a variety of foundry features in your ink script
 
-![Using the PRELOAD and SCENE external functions](github-readme-assets/sceneIntegration.gif)
+<img src="readme-assets/sceneIntegration.gif" alt="Using the PRELOAD and SCENE external functions" align="center" height="512">
