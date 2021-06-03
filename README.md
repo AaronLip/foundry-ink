@@ -10,6 +10,7 @@ Currently, the module supports these features:
 * Loading compiled stories written in ink
 * Interacting with the story in chat or console (toggle via module settings)
 * Accessing Foundry directly from your ink script using the functions `ROLL`, `ACTOR`, and `MACRO`
+* [Online Documentation on github.io](https://aaronlip.github.io/foundry-ink/)
 
 There is still much work to do, which is why this is **version 0**.
 
