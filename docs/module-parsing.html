@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>parsing - Ink in the Foundry</title>
+    
+    <meta name="description" content="When you want to write a visual novel, but also play D&D with friends" />
+    
+        <meta name="keywords" content="ink inkle foundryvtt interactive fiction cyoa story chat" />
+        <meta name="keyword" content="ink inkle foundryvtt interactive fiction cyoa story chat" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://www.github.com/AaronLip/foundry-ink" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Classes</h3><ul><li><a href="module-serde.BindingData.html">serde.BindingData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.BindingData.html#fromFlag">fromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.BindingData.html#toFlag">toFlag</a></li></ul></li><li><a href="module-serde.HookData.html">serde.HookData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.HookData.html#fromFlag">fromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.HookData.html#toFlag">toFlag</a></li></ul></li><li><a href="module-serde.SessionData.html">serde.SessionData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-serde.SessionData.html#.fromFlag">fromFlag</a></li><li data-type='method' style='display: none;'><a href="module-serde.SessionData.html#toFlag">toFlag</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-bindings.html">bindings</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-bindings.html#~ACTOR">ACTOR</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~ITEM">ITEM</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~JOURNAL">JOURNAL</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~MACRO">MACRO</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~PRELOAD">PRELOAD</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~ROLL">ROLL</a></li><li data-type='method' style='display: none;'><a href="module-bindings.html#~SCENE">SCENE</a></li></ul></li><li><a href="module-parsing.html">parsing</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-parsing.html#.parseAltText">parseAltText</a></li><li data-type='method' style='display: none;'><a href="module-parsing.html#.parseInline">parseInline</a></li><li data-type='method' style='display: none;'><a href="module-parsing.html#.parseInterface">parseInterface</a></li></ul></li><li><a href="module-serde.html">serde</a></li><li><a href="module-settings.html">settings</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">parsing</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+                <div class="description usertext"><p>Provides a variety of different parsing tools for foundry ink. These assist
+in converting story text into actions performed by foundry or by installed
+modules.</p></div>
+            
+
+            
+                
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".parseAltText"><span class="type-signature">(static) </span>parseAltText<span class="signature">(text, names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined|Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Parses statements written in the form of <code>DATA--ALTTEXT</code>. This syntax is
+intended for use when data contains some text to show in the ink story once
+the data has been parsed out, so that text can be included in a compact
+format.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>the text to be parsed</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>names</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{ data: 'data', alttext: 'alttext' }</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>maps each of
+the regex groups to a name of your choosing, if specified.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of a group that identifies data to be
+dispatched for use by foundry.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>alttext</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of a group that identifies what
+text to leave behind and emit through ink.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>the result of parsing. When the parse has
+failed, this will be <code>undefined</code>. Otherwise, it will be an object
+containing a named field for each element in the <code>names</code> parameter.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+|
+
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".parseInline"><span class="type-signature">(static) </span>parseInline<span class="signature">(text, names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined|Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Parses statements written in the form of <code>COMMAND (TYPE): ARGUMENT</code>. While
+writing a script, it is common to use inline statements to tag character
+dialogue, or to indicate scene/shot transitions. This syntax is intended for
+the ink story to control foundry.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>the text to be parsed</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>names</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{ command: 'command', type: 'type', argument: 'argument' }</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>maps each of the regex groups to a name of your choosing, if
+specified.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>command</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of the group that identifies the
+purpose of the text.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of a group in parenthesis that
+provides additional information about the text, such as how an actor
+would say it, or what mood they are feeling.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>argument</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of the group that the command and
+type operate on. This would ordinarily include an actor's dialogue,
+which scene to load, or filenames to prepare.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>the result of parsing. When the parse has
+failed, this will be <code>undefined</code>. Otherwise, it will be an object
+containing a named field for each element in the <code>names</code> parameter.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+|
+
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".parseInterface"><span class="type-signature">(static) </span>parseInterface<span class="signature">(text, names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined|Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Parses statements written in the form of <code>INTERFACE&gt;&gt;DATA</code>. This syntax is
+intended for use when the ink story needs to wait for foundry to do
+something, such as fire a hook, before it is time to resume the story.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>the text to be parsed</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>names</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{ interface: 'interface', data: 'data' }</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>maps each
+of the regex groups to a name of your choosing, if specified.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>interface</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of a group that identifies which
+of foundry's internals the story should communicate with.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of a group that identifies the
+configuration data foundry will need to establish the communication
+channel.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>the result of parsing. When the parse has
+failed, this will be <code>undefined</code>. Otherwise, it will be an object
+containing a named field for each element in the <code>names</code> parameter.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+|
+
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

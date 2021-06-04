@@ -1,5 +1,6 @@
 import '../modules/ink.js';
 import * as serde from '../modules/serialization.js';
+import * as parsing from '../modules/parsing.js';
 
 /*
  * Loads a compiled json file for the ink runtime, then returns an inkjs interpreter for that file
@@ -79,12 +80,12 @@ Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) =>
 
     if (game.settings.get('foundry-ink', 'chatRender')) {
 
-        if (game.settings.get('foundry-ink', 'dialogueSyntax') === 1) {
+        if (game.settings.get('foundry-ink', 'dialogueSyntax') == 1) {
 
             sayDialogue(lines);
 
             var html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
-                choices: choices,
+                choices: choiceParse(choices, sourcefile, state),
                 lines: ""
             });
 
@@ -163,14 +164,17 @@ function suppressVisited(parent) {
 
 // Group lines by speaker, in order
 function speakerOrder(lines) {
-    var regex = /^(?<speaker>.+):\s+(?<line>.+)$/;
-
-
     var speakerScripts = (lines
 
     // Convert the text into { speaker?: speaker, line: line } format
     .map(line => {
-        var parse = line.trim().match(regex)?.groups;
+        var parse = parsing.parseInline(
+            line, { 
+                command: 'speaker',
+                type: 'style',
+                argument: 'line'
+            });
+
         if (parse === undefined) {
             return { line: line };
         } else {
@@ -213,14 +217,12 @@ function sayDialogue(lines) {
 
 // parses out scripting syntax from choices
 function choiceParse(choices, sourcefile, state) {
-    var interfaceRegex = /^(?<interface>.+?)\s*>>\s*(?<config>.+)$/
-    var hookRegex = /^(?<hookname>.+?)\s*--\s*(?<choicetext>.+)$/
 
     return Object.entries(choices).map(choice => {
         var index = choice[0];
         var text = choice[1].text;
 
-        var parse = text.trim().match(interfaceRegex)?.groups;
+        var parse = parsing.parseInterface(text);
 
         var choiceContainer = {
             text: text,
@@ -231,19 +233,19 @@ function choiceParse(choices, sourcefile, state) {
         if (parse !== undefined) {
             if (parse.interface === "Hooks") {
                 choiceContainer.interface = parse.interface;
-                var dataParse = parse.config.match(hookRegex)?.groups;
+                var dataParse = parsing.parseAltText(parse.data, { data: 'hookname', alttext: 'choicetext' });
 
                 if (dataParse === undefined) {
                     console.warn(FoundryInk.i18n('templates.issue', {
                         header: FoundryInk.i18n('title'),
                         cause: 'Hook parsing',
                         body: FoundryInk.i18n('warnings.no-choicetext', {
-                            name: parse.config
+                            name: parse.data
                         })
                     }));
 
-                    choiceContainer.text = parse.config;
-                    basicChoiceHook(parse.config, index, sourcefile, state);
+                    choiceContainer.text = parse.data;
+                    basicChoiceHook(parse.data, index, sourcefile, state);
                 } else {
                     choiceContainer.text = dataParse.choicetext;
                     basicChoiceHook(dataParse.hookname, index, sourcefile, state);

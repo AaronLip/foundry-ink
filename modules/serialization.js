@@ -51,7 +51,7 @@ export class SessionData {
      * 
      * @param {FlaggableObject} flaggable - the object that implements foundry's
      *     getFlag interface.
-     * @returns {SessionData} SessionData - the session data that was stored in
+     * @returns {SessionData} the session data that was stored in
      *     a flag.
      */
     static fromFlag(flaggable) {
@@ -116,7 +116,7 @@ export class HookData {
      * 
      * @param {FlaggableObject} flaggable - the object that implements
      *     foundry's setFlag interface.
-     * @returns {HookData} hookData - the hook that was stored in a flag.
+     * @returns {HookData} the hook that was stored in a flag.
      */
     fromFlag(flaggable) {
         var result = new this(flaggable.getFlag('foundry-ink', 'hook'));
@@ -185,7 +185,7 @@ export class BindingData {
      * 
      * @param {FlaggableObject} flaggable - the object that implements foundry's
      *     setFlag interface.
-     * @returns {BindingData} bindingData - the external binding stored in a
+     * @returns {BindingData} the external binding stored in a
      *     flag.
      */
     fromFlag(flaggable, bindingData) {
