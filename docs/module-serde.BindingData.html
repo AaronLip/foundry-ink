@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>HookData - Ink in the Foundry</title>
+    <title>BindingData - Ink in the Foundry</title>
     
     <meta name="description" content="When you want to write a visual novel, but also play D&D with friends" />
     
@@ -40,7 +40,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">HookData</h1>
+    <h1 class="page-title">BindingData</h1>
     
 
     
@@ -55,12 +55,15 @@
         <h2>
             <span class="ancestors"><a href="module-serde.html">serde</a>.</span>
         
-        HookData
+        BindingData
         </h2>
         
-            <div class="class-description usertext"><p>Information about a hook registered by text, bindings, or tags in the ink
-story. Contains data required to reregister the hook after foundry reboots
-or refreshes.</p></div>
+            <div class="class-description usertext"><p>Information about external bindings that is used to serialize them. Ensures
+that bindings created by macros, console commands, or callbacks can be
+rebound when foundry reboots or refreshes.</p>
+<p>You can write a <a href="https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md#fallbacks-for-external-functions">Fallback Function</a>
+so that inky continues to preview your story, or so that you can run the
+story without all of its bindings for testing purposes.</p></div>
         
     
 </header>
@@ -75,7 +78,7 @@ or refreshes.</p></div>
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="HookData"><span class="type-signature"></span>new HookData<span class="signature">(data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="BindingData"><span class="type-signature"></span>new BindingData<span class="signature">(data)</span><span class="type-signature"></span></h4>
 
     
 
@@ -145,13 +148,13 @@ or refreshes.</p></div>
 
         <tr>
             
-                <td class="name"><code>triggerHook</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">Object</span>
 
 
             
@@ -161,15 +164,33 @@ or refreshes.</p></div>
 
             
 
-            <td class="description last"><p>the hook that will run the story's
-callback.</p></td>
-        </tr>
+            <td class="description last"><p>the content to be wrapped by
+serde.BindingData</p>
+                <h6>Properties</h6>
 
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
     
 
         <tr>
             
-                <td class="name"><code>hookType</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
@@ -185,7 +206,8 @@ callback.</p></td>
 
             
 
-            <td class="description last"><p>one of 'once', 'when', or 'until'.</p></td>
+            <td class="description last"><p>the name of the binding in ink by the when
+bound by the EXTERNAL command or called as a function.</p></td>
         </tr>
 
     
@@ -209,14 +231,14 @@ callback.</p></td>
             
 
             <td class="description last"><p>information about the session
-that will be made accessible to the hook when called.</p></td>
+that will be used to rebind the external function.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callbackFn</code></td>
+                <td class="name"><code>externalFn</code></td>
             
 
             <td class="type">
@@ -232,9 +254,16 @@ that will be made accessible to the hook when called.</p></td>
 
             
 
-            <td class="description last"><p>the callback to be serialized
-(deserializing this is effectively <code>eval</code> running at the privilege
-of a macro).</p></td>
+            <td class="description last"><p>the binding to be serialized
+(deserializing this is effectively <code>eval</code> running at the privilege of a
+macro).</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -247,7 +276,7 @@ of a macro).</p></td>
 
 
 <div class="description usertext">
-    <p>Converts a data object into a serde.HookData.</p>
+    <p>Converts a data object into a serde.BindingData.</p>
 </div>
 
 
@@ -301,7 +330,7 @@ of a macro).</p></td>
 
             
 
-            <td class="description last"><p>the content to be wrapped by serde.HookData</p>
+            <td class="description last"><p>the content to be wrapped by serde.BindingData</p>
                 <h6>Properties</h6>
                 
 
@@ -327,7 +356,7 @@ of a macro).</p></td>
 
         <tr>
             
-                <td class="name"><code>triggerHook</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
@@ -343,31 +372,8 @@ of a macro).</p></td>
 
             
 
-            <td class="description last"><p>the hook that will run the story's
-callback.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>hookType</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>one of 'once', 'when', or 'until'.</p></td>
+            <td class="description last"><p>the name of the binding in ink by the
+when bound by the EXTERNAL command or called as a function.</p></td>
         </tr>
 
     
@@ -391,14 +397,14 @@ callback.</p></td>
             
 
             <td class="description last"><p>information about the session
-that will be made accessible to the hook when called.</p></td>
+that will be used to rebind the external function.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>callbackFn</code></td>
+                <td class="name"><code>externalFn</code></td>
             
 
             <td class="type">
@@ -414,7 +420,7 @@ that will be made accessible to the hook when called.</p></td>
 
             
 
-            <td class="description last"><p>the callback to be serialized
+            <td class="description last"><p>the binding to be serialized
 (deserializing this is effectively <code>eval</code> running at the privilege
 of a macro).</p></td>
         </tr>
@@ -537,7 +543,7 @@ a reload.</p>
 
     
 
-    <h4 class="name" id="fromFlag"><span class="type-signature"></span>fromFlag<span class="signature">(flaggable)</span><span class="type-signature"> &rarr; {HookData}</span></h4>
+    <h4 class="name" id="fromFlag"><span class="type-signature"></span>fromFlag<span class="signature">(flaggable)</span><span class="type-signature"> &rarr; {BindingData}</span></h4>
 
     
 
@@ -584,8 +590,8 @@ a reload.</p>
 
 
 <div class="description usertext">
-    <p>Retrieves hook data from a flag, allowing event listeners to be reregistered
-when the user reboots or refreshes foundry.</p>
+    <p>Retrieves external binding data, allowing ink's FFI external bindings to be
+reregistered when a story needs to resume.</p>
 </div>
 
 
@@ -639,8 +645,8 @@ when the user reboots or refreshes foundry.</p>
 
             
 
-            <td class="description last"><p>the object that implements
-foundry's setFlag interface.</p></td>
+            <td class="description last"><p>the object that implements foundry's
+setFlag interface.</p></td>
         </tr>
 
     
@@ -666,7 +672,8 @@ foundry's setFlag interface.</p></td>
 
         
 <div class="param-desc">
-    <p>hookData - the hook that was stored in a flag.</p>
+    <p>bindingData - the external binding stored in a
+flag.</p>
 </div>
 
 
@@ -677,7 +684,7 @@ foundry's setFlag interface.</p></td>
     </dt>
     <dd>
         
-<span class="param-type">HookData</span>
+<span class="param-type">BindingData</span>
 
 
     </dd>
@@ -739,8 +746,9 @@ foundry's setFlag interface.</p></td>
 
 
 <div class="description usertext">
-    <p>Serializes hook data into a flag for a foundry object. This is necessary
-because hooks do not persist when foundry reboots or refreshes.</p>
+    <p>Serializes external binding data into a flag for a foundry object. This is
+necessary because external bindings created by macros or through console
+commands do not persist when foundry is rebooted or refreshed.</p>
 </div>
 
 
