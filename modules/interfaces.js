@@ -32,7 +32,7 @@ export async function advance(inkStory, sourcefile) {
     }
 
     if (inkStory.state.callstackDepth > 1) {
-        console.warn(game.i18n.localize('foundry-ink.warnings.tunnel-saves'));
+        console.warn(FoundryInk.i18n('warnings.tunnel-saves'));
     }
     Hooks.callAll("foundry-ink.maxContinue",
         lines,
@@ -234,9 +234,10 @@ function choiceParse(choices, sourcefile, state) {
                 var dataParse = parse.config.match(hookRegex)?.groups;
 
                 if (dataParse === undefined) {
-                    console.warn(game.i18n.format('foundry-ink.warnings.generic', {
+                    console.warn(FoundryInk.i18n('templates.issue', {
+                        header: FoundryInk.i18n('title'),
                         cause: 'Hook parsing',
-                        message: game.i18n.format('foundry-ink.warnings.no-choicetext', {
+                        body: FoundryInk.i18n('warnings.no-choicetext', {
                             name: parse.config
                         })
                     }));
