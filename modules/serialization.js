@@ -119,7 +119,9 @@ export class HookData {
      * @returns {HookData} hookData - the hook that was stored in a flag.
      */
     fromFlag(flaggable) {
-        return new this(flaggable.getFlag('foundry-ink', 'hook'));
+        var result = new this(flaggable.getFlag('foundry-ink', 'hook'));
+        result.callbackFn = new Function('...args', result.callbackFn);
+        return result;
     }
 }
 
@@ -187,6 +189,8 @@ export class BindingData {
      *     flag.
      */
     fromFlag(flaggable, bindingData) {
-        return new this(flaggable.getFlag('foundry-ink', 'binding'));
+        var result = new this(flaggable.getFlag('foundry-ink', 'binding'));
+        result.callbackFn = new Function('...args', result.callbackFn);
+        return result;
     }
 }
