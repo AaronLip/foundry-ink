@@ -31,7 +31,7 @@ function continueSession(sessionData) {
     Hooks.callAll('foundry-ink.loadSession', sessionData);
 
     // Prepare a 'page' to hold all lines delivered by ink
-    var page = { lines: [], choices: [] };
+    var page = { lines: [], tags: [], choices: [] };
 
     // Deliver one line at a time for parsing reasons
     while (inkStory.canContinue) {
@@ -40,6 +40,10 @@ function continueSession(sessionData) {
         var line = inkStory.Continue();
         page.lines.push(line);
         Hooks.callAll('foundry-ink.deliverLine', line);
+
+        // Deliver tags
+        page.tags.push(inkStory.currentTags);
+        Hooks.callAll('foundry-ink.currentTags', inkStory.currentTags);
     }
 
     // Collect and deliver choices. Now the story is either presenting choices or `-> END`
