@@ -1,3 +1,5 @@
+import '../modules/ink.js';
+import { bindFunctions } from "./bindings.js";
 import * as serde from '../modules/serialization.js';
 import * as parsing from '../modules/parsing.js';
 
@@ -23,40 +25,51 @@ import * as parsing from '../modules/parsing.js';
  * Save the session somewhere > callAll(stateSave
  */
 
-function continueSession(sessionData) {
+export async function continueSession(sessionData) {
 
     // Reload the session
-    inkStory = FoundryInk.loadStory(sessionData.sourcefile);
-    inkStory.state.loadJson(sessionData.state);
+    var inkStory = await FoundryInk.loadStory(sessionData.sourcefile);
+    if (sessionData.state !== null) {
+        inkStory.state.loadJson(sessionData.state);
+    }
     Hooks.callAll('foundry-ink.loadSession', sessionData);
 
+    // Rebind the default external bindings if enabled
+    if (game.settings.get("foundry-ink", "useDefaultBindings")) {
+        bindFunctions(inkStory);
+    }
+
     // Prepare a 'page' to hold all lines delivered by ink
-    var page = { lines: [], tags: [], choices: [] };
+    var page = { frames: [], choices: [] };
 
     // Deliver one line at a time for parsing reasons
     while (inkStory.canContinue) {
 
         // Deliver line
         var line = inkStory.Continue();
-        page.lines.push(line);
-        Hooks.callAll('foundry-ink.deliverLine', line);
+        Hooks.callAll('foundry-ink.deliverLine', line, sessionData);
 
         // Deliver tags
-        page.tags.push(inkStory.currentTags);
-        Hooks.callAll('foundry-ink.currentTags', inkStory.currentTags);
+        var tags = inkStory.currentTags;
+        Hooks.callAll('foundry-ink.currentTags', tags, sessionData);
+
+        // Deliver frame (line + tags)
+        var frame = { line: line, tags: tags};
+        Hooks.callAll('foundry-ink.deliverFrame', frame, sessionData);
+        page.frames.push(frame);
     }
 
     // Collect and deliver choices. Now the story is either presenting choices or `-> END`
-    page.choices.concat(Object.entries(choices).map(choice => {
+    page.choices.concat(Object.entries(inkStory.currentChoices).map(choice => {
         return {
             index: choice[0],
             text: choice[1].text
         }
     }));
-    Hooks.callAll('foundry-ink.deliverChoices', page.choices);
+    Hooks.callAll('foundry-ink.deliverChoices', page.choices, sessionData);
 
     // Deliver page
-    Hooks.callAll('foundry-ink.deliverPage', page);
+    Hooks.callAll('foundry-ink.deliverPage', page, sessionData);
     
     // Warn developers that saving right now will cause bugs
     if (inkStory.state.callstackDepth > 1) {
@@ -67,7 +80,7 @@ function continueSession(sessionData) {
     // Issues can be evaded by tracking the last valid state + choices since then to 'replay' the story.
     Hooks.callAll('foundry-ink.saveSession', new serde.SessionData({
         state: inkStory.state.toJson(),
-        sourcefile: sourcefile,
+        sourcefile: sessionData.sourcefile,
         visited: false
     }), inkStory.state.callstackDepth > 1);
 
