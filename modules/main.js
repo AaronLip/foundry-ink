@@ -46,27 +46,13 @@ Hooks.once("setup", () => {
                 body: error
             }));
         }
-
-        // Rebind default bindings library if the user wants them
-        if (game.settings.get("foundry-ink", "useDefaultBindings")) {
-            bindFunctions(inkStory);
-        }
     });
 
     /**
      * This hook can be called by external modules as an alternative to clicking chat buttons
      */
-    Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
-
-        // Prepare a story instance
-        var fink = await FoundryInk.loadStory(sourcefile);
-        if (state !== null) {
-            fink.state.LoadJson(state);
-        }
-
-        // Make the choice
-        fink.ChooseChoiceIndex(choiceIndex);
-        FoundryInk.advance(fink, sourcefile);
+    Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sessionData) => {
+        continueSession(sessionData, choiceIndex);
     });
 });
 

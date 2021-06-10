@@ -72,50 +72,6 @@ export async function makeChoice(choiceIndex) {
     Hooks.callAll("foundry-ink.makeChoice", choiceIndex, window.FoundryInk._lastStory.sourcefile, window.FoundryInk._lastStory.state);
 }
 
-// Chat Rendering Logic
-Hooks.on("foundry-ink.maxContinue", async (lines, choices, sourcefile, state) => {
-
-    var message;
-    var speaker = { alias: "Ink in the Foundry" }
-
-    if (game.settings.get('foundry-ink', 'chatRender')) {
-
-        if (game.settings.get('foundry-ink', 'dialogueSyntax') == 1) {
-
-            sayDialogue(lines);
-
-            var html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
-                choices: choiceParse(choices, sourcefile, state),
-                lines: ""
-            });
-
-            message = await ChatMessage.create({
-                content: choices.length > 0 ? html : "THE END",
-                speaker: speaker,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER
-            });
-        } else {
-            const html = await renderTemplate("modules/foundry-ink/templates/chat/choices.html", {
-                choices: choiceParse(choices, sourcefile, state),
-                lines: lines.filter(line => line && (line !== '\n')).concat(choices.length > 0 ? [] : ["THE END"])
-            });
-
-            message = await ChatMessage.create({
-                content: html,
-                speaker: speaker,
-                type: CONST.CHAT_MESSAGE_TYPES.OTHER
-            });
-        }
-
-        // Stash the state within the chat message for resume after foundry reboots
-        new serde.SessionData({
-            state: state,
-            sourcefile: sourcefile,
-            visited: false
-        }).toFlag(message);
-    }
-});
-
 // Set up Chat Message handlers when messages are loaded
 Hooks.on("renderChatMessage", (message, html, data) => {
 
@@ -136,15 +92,14 @@ Hooks.on("renderChatMessage", (message, html, data) => {
             Hooks.callAll(
                 "foundry-ink.makeChoice",
                 $(event.target).data('index'),
-                session.sourcefile,
-                session.state)
+                session);
         });
     }
 
     // TODO: Reregister hooks here, switch to journal entries
 });
 
-Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sourcefile, state=null) => {
+Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sessionData) => {
     suppressVisited(document);
 });
 

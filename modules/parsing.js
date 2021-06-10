@@ -30,7 +30,7 @@
  *     containing a named field for each element in the `names` parameter. 
  */
 export function parseInline(text, names={ command: 'command', type: 'type', argument: 'argument' }) {
-    var regex = RegExp(`^(?<${names.command}>.+?)(\\s+\\((?<${names.type}>.+)\\))?\\s*:\\s+(?<${names.argument}>.+)$`);
+    var regex = RegExp(`^\\s*?(?<${names.command}>.+?)(\\s+\\((?<${names.type}>.+)\\))?\\s*:\\s+(?<${names.argument}>.+)$`);
     return text.trim().match(regex)?.groups;
 }
 

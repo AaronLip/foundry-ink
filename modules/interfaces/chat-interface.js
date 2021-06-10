@@ -1,73 +1,105 @@
 import * as parsing from '../parsing.js';
+import * as serde from '../serialization.js';
 
-Hooks.on('foundry-ink.deliverPage', (page, sessionData) => {
+/** Emit chat messages whenever complete paged info about the story is available */
+Hooks.on('foundry-ink.deliverPage', async (page, sessionData) => {
 
     if (FoundryInk.settings('chatRender')) {
 
         var grouped = groupBySpeaker(page.frames);
-        console.log(grouped);
 
+        for (var group of grouped) {
+            var dialogueParseEnabled = ['inline', 'tag'].some(s => _isDialogueSetting(s));
+
+            // Dispatch the message to an html template, dependent on whether support for dialogue is enabled (for modules that hook chat)
+            var template = dialogueParseEnabled ? "modules/foundry-ink/templates/chat/vino-dialogue.html" : "modules/foundry-ink/templates/chat/choices.html";
+            var html = await renderTemplate(
+                template,
+                {
+                    lines: group.frames.reduce((lines, frame) => {
+                        if (frame.line != '\n') {
+                            lines.push(frame.line);
+                        }
+                        return lines;
+                    }, []),
+                    choices: dialogueParseEnabled ? [] : page.choices
+                });
+
+            var actor = game.actors.getName(group.speaker);
+
+            var message = await ChatMessage.create({
+                content: html,
+                speaker: actor !== undefined ? { actor: actor } : { alias: group.speaker },
+                type: group.speaker !== undefined ? CONST.CHAT_MESSAGE_TYPES.IC : CONST.CHAT_MESSAGE_TYPES.OOC
+            });
+
+            // Use an additional choice message after all speakers have spoken to avoid bugging out chat hook modules
+            if (dialogueParseEnabled) {
+                message = await ChatMessage.create({
+                    content: await renderTemplate(
+                        "modules/foundry-ink/templates/chat/choices.html",
+                        {
+                            lines: [],
+                            choices: page.choices
+                        }),
+                    type: CONST.CHAT_MESSAGE_TYPES.OTHER
+                });
+            }
+
+            new serde.SessionData(sessionData).toFlag(message);
+        }
+        
     }
 
 });
 
-Hooks.on('foundry-ink.deliverFrame', (line, sessionData) => {
-    console.log(dialogueParse(line));
-    Hooks.callAll('foundry-ink.deliverDialogue', dialogueParse(line));
+/** Notifies when a piece of dialogue has been delivered */
+Hooks.on('foundry-ink.deliverFrame', async (frame, sessionData) => {
+    Hooks.callAll('foundry-ink.deliverDialogue', dialogueParse(frame));
 });
+
+// ----- Format Conversion Functions ----- //
 
 function dialogueParse(frame) {
 
-    var currentSetting = game.settings.settings.get('foundry-ink.dialogueSyntax').choices[
-        FoundryInk.settings('dialogueSyntax')
-    ];
-    switch (currentSetting) {
-
-        case FoundryInk.i18n('settings.dialogue-syntax.none'):
-
-            return undefined;
-
-
-        case FoundryInk.i18n('settings.dialogue-syntax.inline'):
-
-            return parsing.parseInline(frame.line, {
-                command: 'speaker',
-                type: 'style',
-                argument: 'line'});
-
-
-        case FoundryInk.i18n('settings.dialogue-syntax.tag'):
-
-            return frame.tags.find(tag => {
-                var parse = parsing.parseInline(tag, {
-                    command: 'command',
-                    type: 'style',
-                    argument: 'speaker'
-                });
-                return (parse?.command == 'SPEAKER') && parse?.argument;
-            });
-
-
-        default:
-            var dialogueSetting = FoundryInk.i18n('settings.dialogue-syntax.name');
-            var dialogueSettingText = game.settings.settings.get(
-                'foundry-ink.dialogueSyntax'
-                ).choices[currentDialogueSetting];
-
-            // TODO: localize
-            console.warning(FoundryInk.i18n('templates.general', {
-                header: FoundryInk.i18n('title'),
-                body: `The setting "${dialogueSettingText}" for "${dialogueSetting}" is not currently supported by foundry-ink.`
-            }));
-            return undefined;
+    if (_isDialogueSetting('none')) {
+        return undefined;
     }
+
+    if (_isDialogueSetting('inline')) {
+        return parsing.parseInline(frame.line, {
+            command: 'speaker',
+            type: 'style',
+            argument: 'line'});
+    }
+
+    if (_isDialogueSetting('tag')) {
+        var result = frame.tags.map(tag => parsing.parseInline(tag, {
+            command: 'command',
+            type: 'style',
+            argument: 'speaker'
+        })).find(parse => (parse?.command == 'SPEAKER') && parse?.speaker)
+        return { speaker: result?.speaker, style: result?.style, line: frame.line };
+    }
+
+    // Unsupported Dialogue Setting
+    var dialogueSetting = FoundryInk.i18n('settings.dialogue-syntax.name');
+    var dialogueSettingText = game.settings.settings.get(
+        'foundry-ink.dialogueSyntax'
+        ).choices[FoundryInk.settings('dialogueSyntax')];
+
+    // TODO: localize
+    console.warning(FoundryInk.i18n('templates.general', {
+        header: FoundryInk.i18n('title'),
+        body: `The setting "${dialogueSettingText}" for "${dialogueSetting}" is not currently supported by foundry-ink.`
+    }));
+    return undefined;
 }
 
 function groupBySpeaker(frames) {
-    return frames
-
+    
     // Parse the speaker data for each frame
-    .map(frame => {
+    return frames.map(frame => {
         var parse = dialogueParse(frame);
         if (parse === undefined) {
             return frame;
@@ -87,4 +119,11 @@ function groupBySpeaker(frames) {
         }
         return groups;
     }, []);
+}
+
+// ----- Utility Functions ----- //
+
+function _isDialogueSetting(setting) {
+    var currentSetting = game.settings.settings.get('foundry-ink.dialogueSyntax').choices[FoundryInk.settings('dialogueSyntax')];
+    return currentSetting == FoundryInk.i18n(`settings.dialogue-syntax.${setting}`);
 }
