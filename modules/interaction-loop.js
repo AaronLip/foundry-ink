@@ -90,3 +90,45 @@ export async function continueSession(sessionData, choiceIndex=null) {
     Hooks.callAll('foundry-ink.saveSession', sessionData, inkStory.state.callstackDepth > 1);
 
 }
+
+/* parses out scripting syntax from choices
+TODO: Tear out the hook parsing
+function choiceParse(choices, sourcefile, state) {
+
+    return Object.entries(choices).map(choice => {
+        var index = choice[0];
+        var text = choice[1].text;
+
+        var parse = parsing.parseInterface(text);
+
+        var choiceContainer = {
+            text: text,
+            index: index,
+            hooks: []
+        };
+
+        if (parse !== undefined) {
+            if (parse.interface === "Hooks") {
+                choiceContainer.interface = parse.interface;
+                var dataParse = parsing.parseAltText(parse.data, { data: 'hookname', alttext: 'choicetext' });
+
+                if (dataParse === undefined) {
+                    console.warn(FoundryInk.i18n('templates.issue', {
+                        header: FoundryInk.i18n('title'),
+                        cause: 'Hook parsing',
+                        body: FoundryInk.i18n('warnings.no-choicetext', {
+                            name: parse.data
+                        })
+                    }));
+
+                    choiceContainer.text = parse.data;
+                    basicChoiceHook(parse.data, index, sourcefile, state);
+                } else {
+                    choiceContainer.text = dataParse.choicetext;
+                    basicChoiceHook(dataParse.hookname, index, sourcefile, state);
+                }
+            }
+        }
+        return choiceContainer;
+    });
+}*/

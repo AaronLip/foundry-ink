@@ -1,6 +1,5 @@
 import { registerSettings } from './settings.js';
 import { bindFunctions } from "./bindings.js";
-import { advance, loadStory} from './interfaces.js';
 import { parseInline } from './parsing.js';
 
 import { continueSession } from './interaction-loop.js';
@@ -10,8 +9,11 @@ import './interfaces/console-interface.js';
 Hooks.once("init", async () => {
     // Add types to foundry's namespace
     window.FoundryInk = {
-        advance,
-        loadStory,
+        loadStory: async (jsonFilename) => {
+            var f = await fetch(jsonFilename);
+            var json = await f.text();
+            return new inkjs.Story(json);
+        },
         i18n: (relativePath, formatObj={}) => {
             return game.i18n.format(`foundry-ink.${relativePath}`, formatObj)
         },
