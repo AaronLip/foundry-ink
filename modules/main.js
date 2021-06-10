@@ -1,16 +1,17 @@
 import { registerSettings } from './settings.js';
 import { bindFunctions } from "./bindings.js";
-import { advance, loadStory, makeChoice } from './interfaces.js';
+import { advance, loadStory} from './interfaces.js';
 import { parseInline } from './parsing.js';
-import './interfaces/chat-interface.js';
+
 import { continueSession } from './interaction-loop.js';
+import './interfaces/chat-interface.js';
+import './interfaces/console-interface.js';
 
 Hooks.once("init", async () => {
     // Add types to foundry's namespace
     window.FoundryInk = {
         advance,
         loadStory,
-        makeChoice,
         i18n: (relativePath, formatObj={}) => {
             return game.i18n.format(`foundry-ink.${relativePath}`, formatObj)
         },
@@ -23,6 +24,7 @@ Hooks.once("init", async () => {
         },
         continueSession: continueSession
     };
+    Hooks.callAll('foundry-ink.loadInterfaces');
 });
 
 Hooks.once("setup", () => {

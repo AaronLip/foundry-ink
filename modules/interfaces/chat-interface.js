@@ -45,17 +45,48 @@ Hooks.on('foundry-ink.deliverPage', async (page, sessionData) => {
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER
                 });
             }
-
             new serde.SessionData(sessionData).toFlag(message);
         }
-        
     }
 
 });
 
+// ----- Hook Handler Declarations ----- //
+
 /** Notifies when a piece of dialogue has been delivered */
 Hooks.on('foundry-ink.deliverFrame', async (frame, sessionData) => {
     Hooks.callAll('foundry-ink.deliverDialogue', dialogueParse(frame));
+});
+
+// Set up Chat Message handlers when messages are loaded
+Hooks.on("renderChatMessage", (message, html, data) => {
+
+    suppressVisited(html);
+
+    // Register listeners for unvisited chat buttons
+    if (game.settings.get('foundry-ink', 'chatRender')) {
+
+        var currentChoices = $(html).find('.ink-choice:not(:disabled)');
+
+        currentChoices.on('click', async function() {
+            var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
+
+            var session = serde.SessionData.fromFlag(message);
+            session.visited = true;
+            session.toFlag(message);
+
+            Hooks.callAll(
+                "foundry-ink.makeChoice",
+                $(event.target).data('index'),
+                session);
+        });
+    }
+
+    // TODO: Reregister hooks here, switch to journal entries
+});
+
+Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sessionData) => {
+    suppressVisited(document);
 });
 
 // ----- Format Conversion Functions ----- //
@@ -126,4 +157,18 @@ function groupBySpeaker(frames) {
 function _isDialogueSetting(setting) {
     var currentSetting = game.settings.settings.get('foundry-ink.dialogueSyntax').choices[FoundryInk.settings('dialogueSyntax')];
     return currentSetting == FoundryInk.i18n(`settings.dialogue-syntax.${setting}`);
+}
+
+/** Suppresses DOM listeners on visited choices */
+function suppressVisited(parent) {
+    var choiceButtons = $(parent).find('.ink-choice');
+
+    for (var choiceButton of choiceButtons) {
+        var message = game.collections.get("ChatMessage").get($(choiceButton).closest(".chat-message").data("messageId"));
+        if (serde.SessionData.fromFlag(message)?.visited) {
+
+            $(choiceButton).off('click');
+            $(choiceButton).prop('disabled', true);
+        }
+    }
 }
