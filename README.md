@@ -20,7 +20,8 @@ A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json`
 await FoundryInk.continueSession({
     sourcefile: '/modules/foundry-ink/ink-files/intercept.json',
     state: null,
-    visited: false);
+    visited: false
+});
 ```
 
 <p align="center"><img src="readme-assets/macroWalkthrough.gif" alt="Walkthrough of Macro Usage" height="512"></p>
