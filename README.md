@@ -34,7 +34,7 @@ This is a proof of concept wrapper library for [`inkjs`](https://github.com/y-lo
 
 Some example uses of the ink runtime include:
 
-* [I Would Like to Go Home](https://elenatchi.itch.io/i-would-like-to-go-home), a short interactive about being a Mars exploration unit with only 4.9% battery power left. Playable in your browser.
+* [I Would Like to Go Home](https://elenatchi.itch.io/i-would-like-to-go-home), a short interactive about being a Mars exploration unit with only 5% battery power left. Playable in your browser.
 * inkle's own [Heaven's Vault](https://store.steampowered.com/app/774201/Heavens_Vault/), a nonlinear game about archaeology, ruins, language, and the secret of Heaven's Vault.
 * More can be  found in the [ink-library](https://github.com/inkle/ink-library#ink-games-and-non-games)
 

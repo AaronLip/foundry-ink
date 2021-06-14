@@ -34,7 +34,7 @@ export async function continueSession(sessionData, choiceIndex=null) {
     Hooks.callAll('foundry-ink.loadSession', sessionData);
 
     // Rebind the default external bindings if enabled
-    if (game.settings.get("foundry-ink", "useDefaultBindings")) {
+    if (FoundryInk.settings("useDefaultBindings")) {
         bindFunctions(inkStory);
         /** Allow modules to bind external functions when the story is being re-instantiated */
         await Hooks.callAll("foundry-ink.bindExternalFunctions", inkStory, sessionData);
@@ -67,7 +67,16 @@ export async function continueSession(sessionData, choiceIndex=null) {
     }
 
     // Collect and deliver choices. Now the story is either presenting choices or `-> END`
-    page.choices = choiceParse(inkStory.currentChoices, sessionData);
+    if (FoundryInk.settings('hookSyntax')) {
+        page.choices = choiceParse(inkStory.currentChoices, sessionData);
+    } else {        
+        page.choices = Object.entries(inkStory.currentChoices).map(choice => {
+            return {
+                index: choice[0],
+                text: choice[1].text
+            };
+        });
+    }
     Hooks.callAll('foundry-ink.deliverChoices', page.choices, sessionData);
 
     // Deliver page
