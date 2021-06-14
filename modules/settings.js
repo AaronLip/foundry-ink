@@ -22,6 +22,21 @@ export function registerSettings() {
         });
 
         /**
+         * @member hookSyntax
+         * @property {String} name - Use Hook Registration Syntax
+         * @property {String} hint - Enabling this turns on hook syntax in the text of choices.
+         * @property {Boolean} default - true
+         */
+        await game.settings.register('foundry-ink', 'hookSyntax', {
+            name: settingL10n('hook-syntax.name'),
+            hint: settingL10n('hook-syntax.hint'),
+            scope: 'world',
+            config: true,
+            type: Boolean,
+            default: false
+        });
+
+        /**
          * @member chatRender
          * @property {String} name - ChatMessage Renderer
          * @property {String} hint - Enabling this renderer will output ink stories to the chat window.

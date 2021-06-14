@@ -3,28 +3,27 @@ import { bindFunctions } from "./bindings.js";
 import * as serde from '../modules/serialization.js';
 import * as parsing from '../modules/parsing.js';
 
-/*
- * User input                 > callAll(makeChoice
- * Make an ink story instance > callAll(onResume
- * Bind error handler
- * Bind external functions    > callAll(onBind
- * Emit a line                > callAll(storyLine ?> callAll(storyTag ?> callAll(bindingCall
- *                                          |
- *                                       Dialogue----------------------------------------------> callAll(onDialogue
- *                                       Hook--------------------------------------------------> callAll(onHookRegistered
- *                                       Scene-------------------------------------------------> callAll(onSceneTransition
- *                                       
- * Emit the whole 'page'      > callAll(storyPage
- *                                          |
- *                                       Boxtext-----------------------------------------------> callAll(onBoxText
- *                                       
- * Emit the choices           > callAll(storyChoices
- *                                         |
- *                                       Hook--------------------------------------------------> callAll(onHookRegistered
+/**
+ * Steps an inkStory forward, notifying any listeners by calling hooks to send them new data. 
  * 
- * Save the session somewhere > callAll(stateSave
+ * @param {Object | serde.SessionData } sessionData - Information about the story being resumed
+ * @param {String} sessionData.name - the name of the binding in ink by the when
+ *     bound by the EXTERNAL command or called as a function.
+ * @param {SessionData} sessionData.sessionData - information about the session
+ *     that will be used to rebind the external function.
+ * @param {Function} sessionData.externalFn - the binding to be serialized
+ *     (deserializing this is effectively `eval` running at the privilege of a
+ *     macro).
+ * 
+ * @fires foundry-ink.loadSession
+ * @fires foundry-ink.bindExternalFunctions
+ * @fires foundry-ink.deliverLines
+ * @fires foundry-ink.currentTags
+ * @fires foundry-ink.deliverFrame
+ * @fires foundry-ink.deliverChoices
+ * @fires foundry-ink.deliverPage
+ * @fires foundry-ink.saveSession
  */
-
 export async function continueSession(sessionData, choiceIndex=null) {
 
     // Reload the session
@@ -68,12 +67,7 @@ export async function continueSession(sessionData, choiceIndex=null) {
     }
 
     // Collect and deliver choices. Now the story is either presenting choices or `-> END`
-    page.choices = Object.entries(inkStory.currentChoices).map(choice => {
-        return {
-            index: choice[0],
-            text: choice[1].text
-        }
-    });
+    page.choices = choiceParse(inkStory.currentChoices, sessionData);
     Hooks.callAll('foundry-ink.deliverChoices', page.choices, sessionData);
 
     // Deliver page
@@ -88,47 +82,59 @@ export async function continueSession(sessionData, choiceIndex=null) {
     // Issues can be evaded by tracking the last valid state + choices since then to 'replay' the story.
     sessionData.visited = false;
     Hooks.callAll('foundry-ink.saveSession', sessionData, inkStory.state.callstackDepth > 1);
-
 }
 
-/* parses out scripting syntax from choices
-TODO: Tear out the hook parsing
-function choiceParse(choices, sourcefile, state) {
+/* parses out scripting syntax from choices */
+function choiceParse(choices, sessionData) {
 
-    return Object.entries(choices).map(choice => {
+    return Object.entries(choices).flatMap(choice => {
         var index = choice[0];
         var text = choice[1].text;
 
-        var parse = parsing.parseInterface(text);
-
         var choiceContainer = {
             text: text,
-            index: index,
-            hooks: []
+            index: index
         };
 
-        if (parse !== undefined) {
-            if (parse.interface === "Hooks") {
-                choiceContainer.interface = parse.interface;
-                var dataParse = parsing.parseAltText(parse.data, { data: 'hookname', alttext: 'choicetext' });
-
-                if (dataParse === undefined) {
-                    console.warn(FoundryInk.i18n('templates.issue', {
-                        header: FoundryInk.i18n('title'),
-                        cause: 'Hook parsing',
-                        body: FoundryInk.i18n('warnings.no-choicetext', {
-                            name: parse.data
-                        })
-                    }));
-
-                    choiceContainer.text = parse.data;
-                    basicChoiceHook(parse.data, index, sourcefile, state);
-                } else {
-                    choiceContainer.text = dataParse.choicetext;
-                    basicChoiceHook(dataParse.hookname, index, sourcefile, state);
-                }
-            }
+        /* Attempt to parse the interface syntax, returning the choice text
+         * unaltered if it did not contain an interface call
+         */
+        var parse = parsing.parseInterface(text);
+        if (parse === undefined) {
+            return [choiceContainer];
         }
-        return choiceContainer;
+
+        /* Handle a hooks interface call, parsing out additional information
+         * such as the hook to create, or whether to display the choice to the
+         * user via choicetext
+         */
+        if (parse.interface === "Hooks") {
+            var dParse = parsing.parseAltText(parse.data, { data: 'hookname', alttext: 'choicetext' });
+            var hook = {
+                name: dParse?.hookname ?? parse.data,
+                fn: () => continueSession(sessionData, index)
+            };
+
+            choiceContainer.text = dParse?.choicetext ?? parse.data;
+            choiceContainer.hook = hook;
+            Hooks.once(hook.name, hook.fn);
+        }
+
+        /* When hooks are registered with no alt text, alert the developer that
+         * a choice won't appear.
+         */
+        if (dParse === undefined) {
+            console.warn(FoundryInk.i18n('templates.issue', {
+                header: FoundryInk.i18n('title'),
+                cause: 'Hook parsing',
+                body: FoundryInk.i18n('warnings.no-choicetext', {
+                    name: parse.data
+                })
+            }));
+
+            return [];
+        }
+
+        return [choiceContainer];
     });
-}*/
+}

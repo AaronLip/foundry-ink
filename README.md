@@ -17,9 +17,10 @@ There is still much work to do, which is why this is **version 0**.
 ## How can I test this?
 A `.json` for "The Intercept" is provided at `/modules/ink-files/intercept.json` for testing purposes. You can run it using this macro: 
 ```javascript
-var sourcefile = "/modules/foundry-ink/ink-files/intercept.json";
-var fink = await FoundryInk.loadStory(sourcefile);
-FoundryInk.advance(fink, sourcefile);
+await FoundryInk.continueSession({
+    sourcefile: '/modules/foundry-ink/ink-files/intercept.json',
+    state: null,
+    visited: false);
 ```
 
 <p align="center"><img src="readme-assets/macroWalkthrough.gif" alt="Walkthrough of Macro Usage" height="512"></p>
