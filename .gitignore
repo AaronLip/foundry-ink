@@ -1,2 +1,3 @@
-/docs-src
-/docs-src/*
+# Node Package Manager (NPM)
+node_modules/**
+package-lock.json

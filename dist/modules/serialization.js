@@ -96,7 +96,7 @@ export class HookData {
          * Serialize a javascript function into a string so that it can survive
          * a reload.
          */
-        this.callbackFn = `return (${data.callbackFn.toString()})(...args);`
+        this.callbackFn = `(${data.callbackFn.toString()})(...args)`
     }
 
     /**
@@ -106,8 +106,12 @@ export class HookData {
      * @param {FlaggableObject} flaggable - the object that implements foundry's
      *     setFlag interface.
      */
-    toFlag(flaggable) {
-        flaggable.setFlag('foundry-ink', 'hook', this);
+    async toFlag(flaggable) {
+        if (!flaggable.getFlag('foundry-ink', 'hooks')) {
+            await flaggable.setFlag('foundry-ink', 'hooks', [this]);
+        } else {
+            flaggable.data.flags['foundry-ink'].hooks.push(this);
+        }
     }
 
     /**
@@ -116,12 +120,14 @@ export class HookData {
      * 
      * @param {FlaggableObject} flaggable - the object that implements
      *     foundry's setFlag interface.
-     * @returns {HookData} the hook that was stored in a flag.
+     * @returns {Array<HookData>} the hooks that were stored in a flag.
      */
-    fromFlag(flaggable) {
-        var result = new this(flaggable.getFlag('foundry-ink', 'hook'));
-        result.callbackFn = new Function('...args', result.callbackFn);
-        return result;
+    static fromFlag(flaggable) {
+        return flaggable.getFlag('foundry-ink', 'hooks').map(flagItem => {
+            var hookData = new this(flagItem);
+            hookData.callbackFn = new Function('...args', hookData.callbackFn);
+            return hookData;
+        });
     }
 }
 

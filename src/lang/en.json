@@ -1,0 +1,49 @@
+{
+    "foundry-ink": {
+        "title": "Ink in the Foundry",
+        "ready": "Ink in the Foundry is ready.",
+        "inkjs.name": "inkjs",
+        "settings": {
+            "bindings-library": {
+                "name": "Bind Foundry External Functions",
+                "hint": "Enabling this lets you use some premade helper functions in your ink script. Declare them using the EXTERNAL keyword."
+            },
+            "hook-syntax": {
+                "name": "Use Hook Registration Syntax",
+                "hint": "Enabling this turns on hook syntax in the text of choices."
+            },
+            "chat-render": {
+                "name": "ChatMessage Renderer",
+                "hint": "Enabling this renderer will output ink stories to the chat window."
+            },
+            "console-render": {
+                "name": "Console Renderer",
+                "hint": "Enabling this renderer will output ink stories to the F12 debug console."
+            },
+            "dialogue-syntax": {
+                "name": "Dialogue Indication Syntax",
+                "hint": "If your ink script uses a common syntax to indicate speakers of dialogue, then you can use this drop down to select it.",
+                "none": "None",
+                "inline": "<SPEAKER>: ...",
+                "tag": "... #Dialogue: <SPEAKER>"
+            }
+        },
+        "templates": {
+            "general": "{header} | {body}",
+            "issue": "{header} ({cause}) | {body}",
+            "binding": "{binding} {cause}",
+            "choice-prompt": "choices\n{choices}"
+        },
+        "info": {
+            "macro.run": "MACRO has been run" 
+        },
+        "warnings": {
+            "no-choicetext": "\"{name}\" is the name of a hook, but there was no choicetext to display. This hook will be registered without displaying to the GM.\n\tUse \"Hooks >> hookname -- choicetext\" to display the choice.",
+            "tunnel-saves": "Ink in the Foundry | The ink interpreter is inside a tunnel. Bugs will occur if you save the state here."
+        },
+        "errors": {
+            "not-found": "The entity \"{name}\" was not found. Make sure this name was not a typo!",
+            "not-inkjs-type": "{key} returned a value inkjs cannot handle: {value}"
+        }
+    }
+}

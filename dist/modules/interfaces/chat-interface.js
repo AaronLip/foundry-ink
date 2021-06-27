@@ -12,7 +12,7 @@ Hooks.on('foundry-ink.deliverPage', async (page, sessionData) => {
             var dialogueParseEnabled = ['inline', 'tag'].some(s => _isDialogueSetting(s));
 
             // Dispatch the message to an html template, dependent on whether support for dialogue is enabled (for modules that hook chat)
-            var template = dialogueParseEnabled ? "modules/foundry-ink/templates/chat/vino-dialogue.html" : "modules/foundry-ink/templates/chat/choices.html";
+            var template = dialogueParseEnabled ? "modules/foundry-ink/templates/chat/vino-dialogue.hbs" : "modules/foundry-ink/templates/chat/choices.hbs";
             var html = await renderTemplate(
                 template,
                 {
@@ -33,11 +33,14 @@ Hooks.on('foundry-ink.deliverPage', async (page, sessionData) => {
                 type: group.speaker !== undefined ? CONST.CHAT_MESSAGE_TYPES.IC : CONST.CHAT_MESSAGE_TYPES.OOC
             });
 
-            // Use an additional choice message after all speakers have spoken to avoid bugging out chat hook modules
+            /* 
+             * Use an additional choice message after all speakers have spoken
+             * to avoid bugging out chat hook modules
+             */
             if (dialogueParseEnabled) {
                 message = await ChatMessage.create({
                     content: await renderTemplate(
-                        "modules/foundry-ink/templates/chat/choices.html",
+                        "modules/foundry-ink/templates/chat/choices.hbs",
                         {
                             lines: [],
                             choices: page.choices
@@ -45,10 +48,21 @@ Hooks.on('foundry-ink.deliverPage', async (page, sessionData) => {
                     type: CONST.CHAT_MESSAGE_TYPES.OTHER
                 });
             }
+
+            // Prepare chat flags for persistence
             new serde.SessionData(sessionData).toFlag(message);
+            page.choices.forEach(choice => {
+                if (choice?.hook) {
+                    new serde.HookData({
+                        triggerHook: choice.hook.name,
+                        callbackFn: choice.hook.fn,
+                        sessionData: sessionData,
+                        index: choice.index
+                    }).toFlag(message);
+                }
+            });
         }
     }
-
 });
 
 // ----- Hook Handler Declarations ----- //
@@ -68,22 +82,38 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
         var currentChoices = $(html).find('.ink-choice:not(:disabled)');
 
-        currentChoices.on('click', async function() {
-            var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
-
-            var session = serde.SessionData.fromFlag(message);
-            session.visited = true;
-            session.toFlag(message);
-
-            Hooks.callAll(
-                "foundry-ink.makeChoice",
-                $(event.target).data('index'),
-                session);
-        });
+        currentChoices.on('click', _choiceHandler);
     }
 
     // TODO: Reregister hooks here, switch to journal entries
 });
+
+// Reload hooks
+Hooks.once("ready", () => {
+    var hookedMessages = game.collections.get('ChatMessage').filter(m => m.data.flags['foundry-ink']?.hooks);
+    hookedMessages
+        .map(m => {
+            serde.HookData.fromFlag(m).forEach(h => {
+                Hooks.once(h.triggerHook, () => h.callbackFn(h.sessionData, h.index));
+            })
+        });
+});
+
+/**
+ * Handles choices made by clicking on a chat message
+ */
+async function _choiceHandler() {
+    var message = game.collections.get("ChatMessage").get($(event.target).closest(".chat-message").data("messageId"));
+
+    var session = serde.SessionData.fromFlag(message);
+    session.visited = true;
+    session.toFlag(message);
+
+    Hooks.callAll(
+        "foundry-ink.makeChoice",
+        $(event.target).data('index'),
+        session);
+}
 
 Hooks.on("foundry-ink.makeChoice", async (choiceIndex, sessionData) => {
     suppressVisited(document);

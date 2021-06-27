@@ -121,7 +121,7 @@ function choiceParse(choices, sessionData) {
             var dParse = parsing.parseAltText(parse.data, { data: 'hookname', alttext: 'choicetext' });
             var hook = {
                 name: dParse?.hookname ?? parse.data,
-                fn: () => continueSession(sessionData, index)
+                fn: (sessionData, index) => FoundryInk.continueSession(sessionData, index)
             };
 
             choiceContainer.text = dParse?.choicetext ?? parse.data;
